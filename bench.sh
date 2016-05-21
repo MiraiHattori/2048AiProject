@@ -19,7 +19,7 @@ fi
 
 for i in `seq 1 $number_of_reputation`
 do
-    ruby 2048/2048.rb -exec "./AI"
+    ruby 2048/2048.rb -exec "ruby ai.rb"
     tmpf=$(mktemp)
     cat "logs/2048.log" | grep "total turn" > $tmpf
     echo `awk 'BEGIN {  } END { printf("%d\n", $3); }' $tmpf` >> logs/bench_turn.log

@@ -50,7 +50,7 @@ if LOG_ENABLE
 end
 
 # Execute the AI program via stdin/stdout.------------------------
-stdin, stdout, stderr, wait_thr = *Open3.popen3('./AI')
+stdin, stdout, stderr, wait_thr = *Open3.popen3('./ai.rb')
 
 # Check the Constant value
 if COLUMN < 3 || ROW < 3
