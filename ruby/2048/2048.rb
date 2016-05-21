@@ -1,4 +1,6 @@
-require "open3"
+#!/usr/bin/ruby
+require 'open3'
+require './2048/io_util.rb'
 
 # Constant numbers------------------------------------------------
 COLUMN = 4
@@ -12,66 +14,15 @@ DEBUG_RANDOM_TILE = false
 DEBUG_GAME_STATUS = false
 DEBUG_SORT_JUDGE = false
 DEBUG_SORT_SLEEP = false
+STDOUT_ENABLE = false
 LOG_ENABLE = true
 LOG_PATH_2048 = "logs/2048.log"
 LOG_PATH_AI = "logs/ai.log"
-
-# puts log from 2048/2048.rb
-def putss(str)
-    puts str
-    if LOG_ENABLE
-        File.open(LOG_PATH_2048, "a") do |file|
-          file.puts(str)
-        end
-    end
-end
-# print log from 2048/2048.rb
-def prints(str)
-    print str
-    if LOG_ENABLE
-        File.open(LOG_PATH_2048, "a") do |file|
-            file.print(str)
-        end
-    end
-end
-# puts log from ai.cpp
-def putsa(str)
-    puts str
-    if LOG_ENABLE
-        File.open(LOG_PATH_AI, "a") do |file|
-          file.puts(str)
-        end
-    end
-end
-# print log from ai.cpp
-def printa(str)
-    print str
-    if LOG_ENABLE
-        File.open(LOG_PATH_AI, "a") do |file|
-            file.print(str)
-        end
-    end
-end
-# puts log from ai.cpp without writing on the terminal
-def putsa_log(str)
-    if LOG_ENABLE
-        File.open(LOG_PATH_AI, "a") do |file|
-          file.puts(str)
-        end
-    end
-end
-# print log from ai.cpp without writing on the terminal
-def printa_log(str)
-    if LOG_ENABLE
-        File.open(LOG_PATH_AI, "a") do |file|
-            file.print(str)
-        end
-    end
-end
-
+PRINT_RESULT_BOARD_DATA = true
 
 # Public Variables------------------------------------------------
 @turn_count = 0
+@score = 0
 @send_data = ""
 @game_state = 0
 
@@ -84,7 +35,7 @@ if LOG_ENABLE
         File.unlink(LOG_PATH_2048)
     rescue Errno::ENOENT => file_e
         File.open(LOG_PATH_2048, "w").close()
-        puts "Expected error happened when deleting the latest 2048 log: #{file_e.message} Continue.."
+        puts "Error when deleting the latest 2048 log: #{file_e.message} Continue.."
     rescue => general_e
         putss("Unknown error when deleting the latest 2048 log: #{general_e.message} Continue..")
     end
@@ -92,7 +43,7 @@ if LOG_ENABLE
         File.unlink(LOG_PATH_AI)
     rescue Errno::ENOENT => file_e
         File.open(LOG_PATH_AI, "w").close()
-        puts "Expected error happened when deleting the latest ai log: #{file_e.message} Continue.."
+        puts "Error when deleting the latest ai log: #{file_e.message} Continue.."
     rescue => general_e
         putss("Unknown error when deleting the latest ai log: #{general_e.message} Continue..")
     end
@@ -114,11 +65,11 @@ end
 # Sending the status from this file to the AI file----------------
 send_start = false
 Thread.fork {
-    sleep 0.1
+    sleep 0.001
     while @game_state != 2
         while !send_start
             # wait until the flag becomes false
-            sleep 0.001
+            sleep 0.000001
             if DEBUG_SEND_TIME
                 p send_start
             end
@@ -257,43 +208,44 @@ def setDataToSend()
     @send_data += @game_state.to_s
 end
 
-def flushZero(jarray)
+def flushZero(single_array)
     if DEBUG_SORT_JUDGE
         p "before"
-        p jarray
+        p single_array
     end
     # Flushing the numbers to a certain direction
     cnt = 0
     for i in 0..(ROW - 1)
-        if jarray[cnt] == 0
-            jarray.delete_at(cnt)
-            jarray[ROW - 1] = 0
+        if single_array[cnt] == 0
+            single_array.delete_at(cnt)
+            single_array[ROW - 1] = 0
         else
             cnt += 1
         end
     end
     if DEBUG_SORT_JUDGE
         p "center(0 is flushed.)"
-        p jarray
+        p single_array
     end
     # integration
     iterator = 0
-    while iterator != ROW - 1 && jarray[iterator] != 0
-        if jarray[iterator] == jarray[iterator + 1]
-            jarray[iterator] += 1
-            jarray.delete_at(iterator + 1)
-            jarray[ROW - 1] = 0
+    while iterator != ROW - 1 && single_array[iterator] != 0
+        if single_array[iterator] == single_array[iterator + 1]
+            @score += 2 ** (single_array[iterator] + 1)
+            single_array[iterator] += 1
+            single_array.delete_at(iterator + 1)
+            single_array[ROW - 1] = 0
         end
         iterator += 1
     end
     if DEBUG_SORT_JUDGE
         p "after"
-        p jarray
+        p single_array
     end
     if DEBUG_SORT_JUDGE
         printBoard()
     end
-    jarray
+    single_array
 end
 #{{{goUp, goDown, goLeft, goRight
 def goUp()
@@ -444,8 +396,39 @@ stdout.each do |line|
     end
     judgeGameover()
     if @game_state == 2
-        putss("Game Over")
-        putss("total turn: #{@turn_count}")
+        putss_log("Game Over")
+        putss_log("total turn: #{@turn_count}")
+        putss_log("total score: #{@score}")
+        max_num = 0
+        for i in 0..(ROW - 1)
+            for j in 0..(COLUMN - 1)
+                if @board_data[i][j] > max_num
+                    max_num = @board_data[i][j]
+                end
+            end
+        end
+        putss_log("max num: #{2 ** max_num}")
+        if PRINT_RESULT_BOARD_DATA && !STDOUT_ENABLE
+            for i in 0..(ROW - 1)
+                for j in 0..(COLUMN - 1)
+                    elem_num = @board_data[i][j]
+                    if elem_num == 0
+                        elem_value = 0
+                    else
+                        elem_value = 2 ** elem_num
+                    end
+                    for k in 0..(MAX_DIGIT_TO_SHOW - elem_value.to_s.length)
+                        print(" ")
+                    end
+                    print(elem_value)
+                end
+                print("\n")
+            end
+    print("\n")
+        end
+        puts "total turn: #{@turn_count}"
+        puts "total score: #{@score}"
+        puts "max num: #{2 ** max_num}"
         exit 1
     end
     @game_state = 0
@@ -492,6 +475,7 @@ stdout.each do |line|
         @turn_count += 1
     end
     putss("turn : #{@turn_count}")
+    putss("score : #{@score}")
     setDataToSend()
     printBoard()
     send_start = true
