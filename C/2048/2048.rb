@@ -1,4 +1,6 @@
-require "open3"
+#!/usr/bin/ruby
+require 'open3'
+require './2048/io_util.rb'
 
 # Constant numbers------------------------------------------------
 COLUMN = 4
@@ -12,65 +14,15 @@ DEBUG_RANDOM_TILE = false
 DEBUG_GAME_STATUS = false
 DEBUG_SORT_JUDGE = false
 DEBUG_SORT_SLEEP = false
+STDOUT_ENABLE = false
 LOG_ENABLE = true
 LOG_PATH_2048 = "logs/2048.log"
 LOG_PATH_AI = "logs/ai.log"
-
-# puts log from 2048/2048.rb
-def putss(str)
-    puts str
-    if LOG_ENABLE
-        File.open(LOG_PATH_2048, "a") do |file|
-          file.puts(str)
-        end
-    end
-end
-# print log from 2048/2048.rb
-def prints(str)
-    print str
-    if LOG_ENABLE
-        File.open(LOG_PATH_2048, "a") do |file|
-            file.print(str)
-        end
-    end
-end
-# puts log from ai.cpp
-def putsa(str)
-    puts str
-    if LOG_ENABLE
-        File.open(LOG_PATH_AI, "a") do |file|
-          file.puts(str)
-        end
-    end
-end
-# print log from ai.cpp
-def printa(str)
-    print str
-    if LOG_ENABLE
-        File.open(LOG_PATH_AI, "a") do |file|
-            file.print(str)
-        end
-    end
-end
-# puts log from ai.cpp without writing on the terminal
-def putsa_log(str)
-    if LOG_ENABLE
-        File.open(LOG_PATH_AI, "a") do |file|
-          file.puts(str)
-        end
-    end
-end
-# print log from ai.cpp without writing on the terminal
-def printa_log(str)
-    if LOG_ENABLE
-        File.open(LOG_PATH_AI, "a") do |file|
-            file.print(str)
-        end
-    end
-end
+PRINT_RESULT_BOARD_DATA = true
 
 # Public Variables------------------------------------------------
 @turn_count = 0
+@score = 0
 @send_data = ""
 @game_state = 0
 
@@ -102,38 +54,37 @@ stdin, stdout, stderr, wait_thr = *Open3.popen3('./AI')
 
 # Check the Constant value
 if COLUMN < 3 || ROW < 3
-    putss "COLUMN or ROW value is invalid."
+    putss("COLUMN or ROW value is invalid.")
     exit 1
 end
 if MAX_DIGIT_TO_SHOW < 5
-    putss "MAX_DIGIT_TO_SHOW value is too small."
+    putss("MAX_DIGIT_TO_SHOW value is too small.")
     exit 1
 end
 
 # Sending the status from this file to the AI file----------------
 send_start = false
 Thread.fork {
-    sleep 1
+    sleep 0.001
     while @game_state != 2
         while !send_start
             # wait until the flag becomes false
-            sleep 0.001
+            sleep 0.000001
             if DEBUG_SEND_TIME
-                putss send_start
+                p send_start
             end
         end
         if DEBUG_SEND
-            prints "sending data : "
-            putss @send_data
-            putss "\n"
+            prints("sending data : ")
+            putss(@send_data)
         end
         stdin.puts @send_data
         if DEBUG_SEND
-            putss "Sending data end."
+            putss("Sending data end.")
         end
         send_start = false
         if DEBUG_SEND
-            putss "Closing stdin"
+            putss("Closing stdin")
         end
         stdin.close    # close_write is also available.
     end
@@ -191,7 +142,7 @@ def initTile()
         empty_tile_num = empty_tiles.length
         if empty_tile_num == 0
             if DEBUG_RANDOM_TILE
-                putss "No tiles has been filled."
+                putss("No tiles has been filled.")
             end
         else
             random_tile1 = rand(empty_tile_num)
@@ -219,7 +170,7 @@ def putRandomTile()
         empty_tile_num = empty_tiles.length
         if empty_tile_num == 0
             if DEBUG_RANDOM_TILE
-                putss "No tiles has been filled."
+                putss("No tiles has been filled.")
             end
         else
             random_tile = rand(empty_tile_num)
@@ -239,13 +190,13 @@ def printBoard()
                 elem_value = 2 ** elem_num
             end
             for k in 0..(MAX_DIGIT_TO_SHOW - elem_value.to_s.length)
-                prints " "
+                prints(" ")
             end
-            prints elem_value
+            prints(elem_value)
         end
-        prints "\n"
+        prints("\n")
     end
-    prints "\n"
+    prints("\n")
 end
 def setDataToSend()
     @send_data = ""
@@ -257,43 +208,44 @@ def setDataToSend()
     @send_data += @game_state.to_s
 end
 
-def flushZero(jarray)
+def flushZero(single_array)
     if DEBUG_SORT_JUDGE
         p "before"
-        p jarray
+        p single_array
     end
     # Flushing the numbers to a certain direction
     cnt = 0
     for i in 0..(ROW - 1)
-        if jarray[cnt] == 0
-            jarray.delete_at(cnt)
-            jarray[ROW - 1] = 0
+        if single_array[cnt] == 0
+            single_array.delete_at(cnt)
+            single_array[ROW - 1] = 0
         else
             cnt += 1
         end
     end
     if DEBUG_SORT_JUDGE
         p "center(0 is flushed.)"
-        p jarray
+        p single_array
     end
     # integration
     iterator = 0
-    while iterator != ROW - 1 && jarray[iterator] != 0
-        if jarray[iterator] == jarray[iterator + 1]
-            jarray[iterator] += 1
-            jarray.delete_at(iterator + 1)
-            jarray[ROW - 1] = 0
+    while iterator != ROW - 1 && single_array[iterator] != 0
+        if single_array[iterator] == single_array[iterator + 1]
+            @score += 2 ** (single_array[iterator] + 1)
+            single_array[iterator] += 1
+            single_array.delete_at(iterator + 1)
+            single_array[ROW - 1] = 0
         end
         iterator += 1
     end
     if DEBUG_SORT_JUDGE
         p "after"
-        p jarray
+        p single_array
     end
     if DEBUG_SORT_JUDGE
         printBoard()
     end
-    jarray
+    single_array
 end
 #{{{goUp, goDown, goLeft, goRight
 def goUp()
@@ -424,14 +376,14 @@ end
 
 # Initializing the board------------------------------------------
 if DEBUG
-    putss "debug_mode"
+    putss("debug_mode")
 end
-putss "Initial board state"
+putss("Initial board state")
 initTile()
 setDataToSend()
 printBoard()
 if DEBUG
-    putss "send_start"
+    putss("send_start")
 end
 send_start = true
 
@@ -440,59 +392,95 @@ send_start = true
 stdout.each do |line|
     line.chomp! #改行削除
     if DEBUG_RECEIVE
-        putss "received_data #{line}"
+        putss("received_data #{line}")
     end
     judgeGameover()
     if @game_state == 2
-        putss "Game Over"
-        putss "total turn: #{@turn_count}"
+        putss_log("Game Over")
+        putss_log("total turn: #{@turn_count}")
+        putss_log("total score: #{@score}")
+        max_num = 0
+        for i in 0..(ROW - 1)
+            for j in 0..(COLUMN - 1)
+                if @board_data[i][j] > max_num
+                    max_num = @board_data[i][j]
+                end
+            end
+        end
+        putss_log("max num: #{2 ** max_num}")
+        if PRINT_RESULT_BOARD_DATA && !STDOUT_ENABLE
+            for i in 0..(ROW - 1)
+                for j in 0..(COLUMN - 1)
+                    elem_num = @board_data[i][j]
+                    if elem_num == 0
+                        elem_value = 0
+                    else
+                        elem_value = 2 ** elem_num
+                    end
+                    for k in 0..(MAX_DIGIT_TO_SHOW - elem_value.to_s.length)
+                        print(" ")
+                    end
+                    print(elem_value)
+                end
+                print("\n")
+            end
+    print("\n")
+        end
+        puts "total turn: #{@turn_count}"
+        puts "total score: #{@score}"
+        puts "max num: #{2 ** max_num}"
         exit 1
     end
     @game_state = 0
     case line
     when "up", "2", "u" then
-        putsa "up"
+        putss("up")
+        putsa_log("up")
         goUp()
     when "down", "4", "d" then
-        putsa "down"
+        putss("down")
+        putsa_log("down")
         goDown()
     when "right", "1", "r" then
-        putsa "right"
+        putss("right")
+        putsa_log("right")
         goRight()
     when "left", "3", "l" then
-        putsa "left"
+        putss("left")
+        putsa_log("left")
         goLeft()
     else
-        putsa "Message from AI: #{line}"
+        putsa("Message from AI: #{line}")
         @game_state = 1
         next
     end
     if DEBUG_GAME_STATUS
         case @game_state
         when 0 then
-            putss "Move success. Continue.."
+            putss("Move success. Continue..")
         when 1 then
-            putss "Move failed, but there's another way to move the tiles."
+            putss("Move failed, but there's another way to move the tiles.")
         when 2 then
-            putss "Game Over"
+            putss("Game Over")
         else
-            putss "Invalid game_state value."
+            putss("Invalid game_state value.")
         end
     end
     if DEBUG_SORT_SLEEP
-        putss "sleep 5"
+        putss("sleep 5")
         sleep 5
     end
     putRandomTile()
     if @game_state == 0
         @turn_count += 1
     end
-    putss "turn : #{@turn_count}"
+    putss("turn : #{@turn_count}")
+    putss("score : #{@score}")
     setDataToSend()
     printBoard()
     send_start = true
     if DEBUG_SEND
-        putss "send_started"
+        putss("send_started")
     end
 end
-putss "end" if wait_thr.value.exitstatus
+putss("end") if wait_thr.value.exitstatus
