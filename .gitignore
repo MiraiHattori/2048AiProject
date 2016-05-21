@@ -1,10 +1,4 @@
-C/strategy
-C/logs
-C/past_logs
-cpp/stragegy
-cpp/logs
-cpp/past_logs
-ruby/strategy
-ruby/logs
-ruby/past_logs
+strategy/*
+logs/*
+past_logs/*
 AI
