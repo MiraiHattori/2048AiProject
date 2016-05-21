@@ -83,11 +83,11 @@ Thread.fork {
             putss("Sending data end.")
         end
         send_start = false
+        if DEBUG_SEND
+            putss("Closing stdin")
+        end
+        stdin.close    # close_write is also available.
     end
-    if DEBUG_SEND
-        putss("Closing stdin")
-    end
-    stdin.close    # close_write is also available.
 }
 # function definition---------------------------------------------
 def judgeGameover()
