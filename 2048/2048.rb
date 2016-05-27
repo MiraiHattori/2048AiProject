@@ -14,7 +14,9 @@ DEBUG_RANDOM_TILE = false
 DEBUG_GAME_STATUS = false
 DEBUG_SORT_JUDGE = false
 DEBUG_SORT_SLEEP = false
+DEBUG_SLEEP_INTERVAL = 0
 STDOUT_ENABLE = false
+MESSAGE_FROM_AI_ENEBLE = false
 LOG_ENABLE = true
 LOG_PATH_2048 = "logs/2048.log"
 LOG_PATH_AI = "logs/ai.log"
@@ -70,6 +72,7 @@ Thread.fork {
         while !send_start
             # wait until the flag becomes false
             sleep 0.000001
+            sleep DEBUG_SLEEP_INTERVAL
             if DEBUG_SEND_TIME
                 p send_start
             end

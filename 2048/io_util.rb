@@ -23,7 +23,7 @@ def prints(str)
 end
 # puts log from ai.cpp
 def putsa(str)
-    if STDOUT_ENABLE
+    if MESSAGE_FROM_AI_ENEBLE
         puts str
     end
     if LOG_ENABLE
@@ -34,7 +34,7 @@ def putsa(str)
 end
 # print log from ai.cpp
 def printa(str)
-    if STDOUT_ENABLE
+    if MESSAGE_FROM_AI_ENEBLE
         print str
     end
     if LOG_ENABLE
@@ -61,7 +61,7 @@ def prints_log(str)
 end
 # puts log from ai.cpp without writing on the terminal
 def putsa_log(str)
-    if LOG_ENABLE
+    if MESSAGE_FROM_AI_ENEBLE
         File.open(LOG_PATH_AI, "a") do |file|
           file.puts(str)
         end
@@ -69,7 +69,7 @@ def putsa_log(str)
 end
 # print log from ai.cpp without writing on the terminal
 def printa_log(str)
-    if LOG_ENABLE
+    if MESSAGE_FROM_AI_ENEBLE
         File.open(LOG_PATH_AI, "a") do |file|
             file.print(str)
         end
