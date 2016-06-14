@@ -1,7 +1,8 @@
 #!/bin/bash
-number_of_reputation=100
+number_of_reputation=10
+g++ 2048.cpp -o AI -std=c++11 -Wall -Wextra -Wconversion
 
-if [ ! -f 2048/2048.rb ]; then
+if [ ! -f 2048.cpp ]; then
     echo "aiプログラムやlogs等があるディレクトリで実行してください"
     exit 1
 fi
@@ -10,27 +11,30 @@ if [ ! -e logs ]; then
     mkdir logs
 fi
 
+if [ -f logs/bench_score.log ]; then
+    rm logs/bench_score.log
+fi
 if [ -f logs/bench_turn.log ]; then
     rm logs/bench_turn.log
 fi
-if [ -f logs/bench_score.log ]; then
-    rm logs/bench_score.log
+if [ -f logs/bench_max_num.log ]; then
+    rm logs/bench_max_num.log
 fi
 
 for i in `seq 1 $number_of_reputation`
 do
-    ruby 2048/2048.rb -exec "./AI"
+    ./AI -j3
     tmpf=$(mktemp)
-    cat "logs/2048.log" | grep "total turn" > $tmpf
-    echo `awk 'BEGIN {  } END { printf("%d\n", $3); }' $tmpf` >> logs/bench_turn.log
+    cat "logs/result.log" | grep "Turn" > $tmpf
+    echo `awk 'BEGIN {  } END { printf("%d\n", $2); }' $tmpf` >> logs/bench_turn.log
     rm $tmpf
     tmpf=$(mktemp)
-    cat "logs/2048.log" | grep "total score" > $tmpf
-    echo `awk 'BEGIN {  } END { printf("%d\n", $3); }' $tmpf` >> logs/bench_score.log
+    cat "logs/result.log" | grep "Score" > $tmpf
+    echo `awk 'BEGIN {  } END { printf("%d\n", $2); }' $tmpf` >> logs/bench_score.log
     rm $tmpf
     tmpf=$(mktemp)
-    cat "logs/2048.log" | grep "max num" > $tmpf
-    echo `awk 'BEGIN {  } END { printf("%d\n", $3); }' $tmpf` >> logs/bench_max_num.log
+    cat "logs/result.log" | grep "Max_Num" > $tmpf
+    echo `awk 'BEGIN {  } END { printf("%d\n", $2); }' $tmpf` >> logs/bench_max_num.log
     rm $tmpf
 done
 
