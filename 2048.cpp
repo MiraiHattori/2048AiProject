@@ -5,25 +5,25 @@
 #include <fstream>
 
 /*constant------------------------------------------------*/
-#define COLUMN 4
-#define ROW 4
-#define STDOUT_BOARD false
-#define STDOUT_COMMAND false
-#define STDOUT_TURN false
-#define STDOUT_GAMESTATUS false
-#define STDOUT_NOAVAILABLETILE false
-#define STDOUT_SCORE false
-#define STDOUT_RESULT_BOARD false
-#define STDOUT_RESULT_TURN false
-#define STDOUT_RESULT_MAXNUM false
-#define STDOUT_RESULT_SCORE false
-#define STDOUT_RESULT_STATUS false
-#define LOGPATH_STDOUT_ALL "./logs/stdout_all.log"
-#define LOGPATH_STDOUT_RESULT "./logs/result.log"
-#define FILEIO_STDOUT false
-#define FILEIO_RESULT true
-#define MAX_DIGIT_TO_SHOW 4
-#define DEBUG_PRINTBOARD false
+constexpr int COLUMN = 4;
+constexpr int ROW = 4;
+constexpr bool STDOUT_BOARD = false;
+constexpr bool STDOUT_COMMAND = false;
+constexpr bool STDOUT_TURN = false;
+constexpr bool STDOUT_GAMESTATUS = false;
+constexpr bool STDOUT_NOAVAILABLETILE = false;
+constexpr bool STDOUT_SCORE = false;
+constexpr bool STDOUT_RESULT_BOARD = false;
+constexpr bool STDOUT_RESULT_TURN = false;
+constexpr bool STDOUT_RESULT_MAXNUM = false;
+constexpr bool STDOUT_RESULT_SCORE = false;
+constexpr bool STDOUT_RESULT_STATUS = false;
+std::string LOGPATH_STDOUT_ALL = "./logs/stdout_all.log";
+std::string LOGPATH_STDOUT_RESULT = "./logs/result.log";
+constexpr bool FILEIO_STDOUT = false;
+constexpr bool FILEIO_RESULT = true;
+constexpr int MAX_DIGIT_TO_SHOW = 4;
+constexpr bool DEBUG_PRINTBOARD = false;
 
 
 // {{{ initial definition
