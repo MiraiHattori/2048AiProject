@@ -2,10 +2,15 @@
 
 #include <array>
 #include <iostream>
+#include <memory>
 
+#include "config/params.hpp"
 #include "util/random.hpp"
 
-template <int ROW_SIZE, int COL_SIZE>
+namespace Board
+{
+
+template <int ROW_SIZE_, int COL_SIZE_>
 class Board
 {
 public:
@@ -20,17 +25,17 @@ public:
     explicit Board()
     {
         this->placeTwoOrFour();
-        this->eagerEvaluationIfMoved();
+        this->eagerMoveEvaluation();
     }
 
     void clear()
     {
-        m_board_array = std::array<std::array<int, COL_SIZE>, ROW_SIZE>();
+        m_board_array = std::array<std::array<int, COL_SIZE_>, ROW_SIZE_>();
         this->placeTwoOrFour();
-        this->eagerEvaluationIfMoved();
+        this->eagerMoveEvaluation();
     }
 
-    std::array<std::array<int, COL_SIZE>, ROW_SIZE> boardArray() const
+    std::array<std::array<int, COL_SIZE_>, ROW_SIZE_> boardArray() const
     {
         return m_board_array;
     }
@@ -39,8 +44,8 @@ public:
     bool placeTwoOrFour()
     {
         std::vector<std::array<int, 2>> blank{};
-        for (int row = 0; row < ROW_SIZE; row++) {
-            for (int col = 0; col < COL_SIZE; col++) {
+        for (int row = 0; row < ROW_SIZE_; row++) {
+            for (int col = 0; col < COL_SIZE_; col++) {
                 if (m_board_array[row][col] == 0) {
                     blank.emplace_back(std::array<int, 2>({row, col}));
                 }
@@ -61,24 +66,33 @@ public:
         return has_space;
     }
 
-    bool update()
+    bool move()
     {
-        std::array<std::array<int, COL_SIZE>, ROW_SIZE> board_array_pre = m_board_array;
+        using Params::DEBUG_PRINTCOMMAND;
+        std::array<std::array<int, COL_SIZE_>, ROW_SIZE_> board_array_pre = m_board_array;
         switch (m_next_manip) {
         case Manipulation::Up:
-            std::cout << "up" << std::endl;
+            if (DEBUG_PRINTCOMMAND) {
+                std::cout << "up" << std::endl;
+            }
             m_board_array = m_board_array_if_up;
             break;
         case Manipulation::Left:
-            std::cout << "left" << std::endl;
+            if (DEBUG_PRINTCOMMAND) {
+                std::cout << "left" << std::endl;
+            }
             m_board_array = m_board_array_if_left;
             break;
         case Manipulation::Down:
-            std::cout << "down" << std::endl;
+            if (DEBUG_PRINTCOMMAND) {
+                std::cout << "down" << std::endl;
+            }
             m_board_array = m_board_array_if_down;
             break;
         case Manipulation::Right:
-            std::cout << "right" << std::endl;
+            if (DEBUG_PRINTCOMMAND) {
+                std::cout << "right" << std::endl;
+            }
             m_board_array = m_board_array_if_right;
             break;
         default:
@@ -87,27 +101,33 @@ public:
             break;
         }
         m_next_manip = Manipulation::None;
-        // return board_array_pre != m_board_array;
-        return true;
+        // 操作をしても盤面が変わらなかったらfalseを返す
+        return board_array_pre != m_board_array;
     }
 
-    std::array<std::array<int, COL_SIZE>, ROW_SIZE> boardArrayIfUp() const { return m_board_array_if_up; }
-    std::array<std::array<int, COL_SIZE>, ROW_SIZE> boardArrayIfLeft() const { return m_board_array_if_left; }
-    std::array<std::array<int, COL_SIZE>, ROW_SIZE> boardArrayIfDown() const { return m_board_array_if_down; }
-    std::array<std::array<int, COL_SIZE>, ROW_SIZE> boardArrayIfRight() const { return m_board_array_if_right; }
+    std::array<std::array<int, COL_SIZE_>, ROW_SIZE_> boardArrayIfUp() const { return m_board_array_if_up; }
+
+    std::array<std::array<int, COL_SIZE_>, ROW_SIZE_> boardArrayIfLeft() const { return m_board_array_if_left; }
+
+    std::array<std::array<int, COL_SIZE_>, ROW_SIZE_> boardArrayIfDown() const { return m_board_array_if_down; }
+
+    std::array<std::array<int, COL_SIZE_>, ROW_SIZE_> boardArrayIfRight() const { return m_board_array_if_right; }
 
     void up() { m_next_manip = Manipulation::Up; }
+
     void left() { m_next_manip = Manipulation::Left; }
+
     void down() { m_next_manip = Manipulation::Down; }
+
     void right() { m_next_manip = Manipulation::Right; }
 
     // 上下左右に移動した場合、盤面がどうなるのか先行評価する
-    void eagerEvaluationIfMoved()
+    void eagerMoveEvaluation()
     {
         /*
-         * m_board_array_if_.*を更新する
-         * 上下の場合、COL_SIZE本のROW_SIZEの長さのarrayがあって、それぞれのarrayが上下方向にflushされる
-         */
+             * m_board_array_if_.*を更新する
+             * 上下の場合、COL_SIZE本のROW_SIZEの長さのarrayがあって、それぞれのarrayが上下方向にflushされる
+             */
         this->flushUp();
         this->flushLeft();
         this->flushDown();
@@ -144,13 +164,13 @@ public:
 
     void flushUp()
     {
-        for (int col = 0; col < COL_SIZE; col++) {
-            std::array<int, ROW_SIZE> a{};
-            for (int row = 0; row < ROW_SIZE; row++) {
+        for (int col = 0; col < COL_SIZE_; col++) {
+            std::array<int, ROW_SIZE_> a{};
+            for (int row = 0; row < ROW_SIZE_; row++) {
                 a[row] = m_board_array[row][col];
             }
             a = this->flush(a);
-            for (int row = 0; row < ROW_SIZE; row++) {
+            for (int row = 0; row < ROW_SIZE_; row++) {
                 m_board_array_if_up[row][col] = a[row];
             }
         }
@@ -158,35 +178,35 @@ public:
 
     void flushLeft()
     {
-        for (int row = 0; row < ROW_SIZE; row++) {
+        for (int row = 0; row < ROW_SIZE_; row++) {
             m_board_array_if_left[row] = this->flush(m_board_array[row]);
         }
     }
 
     void flushDown()
     {
-        for (int col = 0; col < COL_SIZE; col++) {
-            std::array<int, ROW_SIZE> a{};
-            for (int row = 0; row < ROW_SIZE; row++) {
-                a[ROW_SIZE - row - 1] = m_board_array[row][col];
+        for (int col = 0; col < COL_SIZE_; col++) {
+            std::array<int, ROW_SIZE_> a{};
+            for (int row = 0; row < ROW_SIZE_; row++) {
+                a[ROW_SIZE_ - row - 1] = m_board_array[row][col];
             }
             a = this->flush(a);
-            for (int row = 0; row < ROW_SIZE; row++) {
-                m_board_array_if_down[row][col] = a[ROW_SIZE - row - 1];
+            for (int row = 0; row < ROW_SIZE_; row++) {
+                m_board_array_if_down[row][col] = a[ROW_SIZE_ - row - 1];
             }
         }
     }
 
     void flushRight()
     {
-        for (int row = 0; row < ROW_SIZE; row++) {
-            std::array<int, COL_SIZE> a{};
-            for (int col = 0; col < COL_SIZE; col++) {
-                a[COL_SIZE - col - 1] = m_board_array[row][col];
+        for (int row = 0; row < ROW_SIZE_; row++) {
+            std::array<int, COL_SIZE_> a{};
+            for (int col = 0; col < COL_SIZE_; col++) {
+                a[COL_SIZE_ - col - 1] = m_board_array[row][col];
             }
             a = this->flush(a);
-            for (int col = 0; col < COL_SIZE; col++) {
-                m_board_array_if_right[row][col] = a[COL_SIZE - col - 1];
+            for (int col = 0; col < COL_SIZE_; col++) {
+                m_board_array_if_right[row][col] = a[COL_SIZE_ - col - 1];
             }
         }
     }
@@ -200,10 +220,13 @@ private:
     // 現在のスコア
     int m_score = 0;
     // 2の指数で保持される盤面データ。0は空タイルを表す
-    std::array<std::array<int, COL_SIZE>, ROW_SIZE> m_board_array{};
+    std::array<std::array<int, COL_SIZE_>, ROW_SIZE_> m_board_array{};
     // 上下左右に移動したときの盤面データ。2 or 4のタイルを追加した直後に必ず計算すること
-    std::array<std::array<int, COL_SIZE>, ROW_SIZE> m_board_array_if_up{};
-    std::array<std::array<int, COL_SIZE>, ROW_SIZE> m_board_array_if_left{};
-    std::array<std::array<int, COL_SIZE>, ROW_SIZE> m_board_array_if_down{};
-    std::array<std::array<int, COL_SIZE>, ROW_SIZE> m_board_array_if_right{};
+    std::array<std::array<int, COL_SIZE_>, ROW_SIZE_> m_board_array_if_up{};
+    std::array<std::array<int, COL_SIZE_>, ROW_SIZE_> m_board_array_if_left{};
+    std::array<std::array<int, COL_SIZE_>, ROW_SIZE_> m_board_array_if_down{};
+    std::array<std::array<int, COL_SIZE_>, ROW_SIZE_> m_board_array_if_right{};
 };
+
+extern std::unique_ptr<Board<Params::ROW_SIZE, Params::COL_SIZE>> board;
+}  // namespace Board

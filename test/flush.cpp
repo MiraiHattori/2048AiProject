@@ -1,43 +1,24 @@
 #include "board/board.hpp"
 
+
 template <typename T>
-T flush(const T& arr_)
+void flush(const T& arr_)
 {
-    for (const auto& e : arr_) {
-        std::cout << e;
+    for (const auto& elem : arr_) {
+        std::cout << elem;
+    }
+    std::cout << " -> ";
+    T arr;
+    arr = Board::board->flush(arr_);
+    for (const auto& elem : arr) {
+        std::cout << elem;
     }
     std::cout << std::endl;
-    T arr{};
-    // 先頭から走査する
-    // 左詰めするときのindex
-    int arr_index = 0;
-    int cand = 0;
-    for (unsigned int i = 0; i < arr_.size(); i++) {
-        if (arr_[i] == 0) {
-            continue;
-        } else {
-            if (arr_[i] != cand) {
-                if (cand != 0) {
-                    arr_index++;
-                }
-                arr[arr_index] = arr_[i];
-                cand = arr_[i];
-            } else {
-                arr[arr_index] = cand + 1;
-                cand = 0;
-                arr_index++;
-            }
-        }
-    }
-    for (const auto& e : arr) {
-        std::cout << e;
-    }
-    std::cout << std::endl;
-    return arr;
 }
 
 int main()
 {
+    Board::board.reset();
     std::array<int, 4> arr_0({0, 1, 1, 1});
     std::array<int, 4> arr_1({1, 1, 1, 1});
     std::array<int, 4> arr_2({1, 0, 1, 1});
