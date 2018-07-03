@@ -36,6 +36,9 @@ $ ./main
 - 盤面を上下左右に動かしたときの盤面はすでに計算されていて、`board->boardArrayIfUp()`, `board->boardArrayIfLeft()`, `board->boardArrayIfDown()`, `board->boardArrayIfRight()`などで取得できます。
   - The four move cases are eagerly evaluated. You can get the future board data by functions `board->boardArrayIfUp()`, `board->boardArrayIfLeft()`, `board->boardArrayIfDown()`, `board->boardArrayIfRight()`.
 
+- 盤面を上下左右に動かしたときに追加で得られる点数もすでに計算されていて、`board->scoreIfUp()`, `board->scoreIfLeft()`, `board->scoreIfDown()`, `board->scoreIfRight()`などで取得できます。
+  - The scores are also eagerly evaluated. You can get the future board data by functions `board->scoreIfUp()`, `board->scoreIfLeft()`, `board->scoreIfDown()`, `board->scoreIfRight()`.
+  
 - `board->up()`, `board->left()`, `board->down()`, `board->right()`の4種類でタイルをどちら側に動かすか操作してください。`void ai()`内で最後に呼ばれたものが動きとして採用されます。
   - Call `board->up()`, `board->left()`, `board->down()` or `board->right()` function in `void ai()`. The next manipulation is decided by the latest called function among them.
   
