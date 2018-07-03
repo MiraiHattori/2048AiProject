@@ -2,6 +2,8 @@
 
 #include <random>
 
+namespace Util
+{
 
 template <typename T>
 T randUniform(T min, T max)
@@ -11,3 +13,5 @@ T randUniform(T min, T max)
     std::uniform_real_distribution<double> rand(min, max);
     return static_cast<int>(rand(rand_generator));
 }
+
+}  // namespace Util

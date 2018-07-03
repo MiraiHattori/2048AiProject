@@ -47,4 +47,5 @@ int main()
     flush(arr_11);
     flush(arr_12);
     flush(arr_13);
+    return 0;
 }
