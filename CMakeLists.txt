@@ -54,5 +54,9 @@ function(add_test_target TESTNAME)
     )
 endfunction(add_test_target)
 
+# ClangFormat
+add_custom_target(format
+    COMMAND git ls-files `git rev-parse --show-toplevel` | grep \"[ch]pp\" | xargs clang-format-6.0-robotech -style=file -i)
+# add_dependencies(robot format)
 
 add_test_target(flush)
