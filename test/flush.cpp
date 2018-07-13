@@ -9,7 +9,7 @@ void flush(const T& arr_)
     }
     std::cout << " -> ";
     T arr;
-    arr = Board::board->flush(arr_);
+    arr = Board::board->flush(arr_).first;
     for (const auto& elem : arr) {
         std::cout << elem;
     }

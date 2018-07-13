@@ -60,3 +60,10 @@ add_custom_target(format
 # add_dependencies(robot format)
 
 add_test_target(flush)
+add_test_target(relu)
+add_test_target(sigmoid)
+add_test_target(affine)
+add_test_target(softmax)
+add_test_target(cross_entropy_error)
+add_test_target(softmax_with_loss)
+add_test_target(full_connected_network)

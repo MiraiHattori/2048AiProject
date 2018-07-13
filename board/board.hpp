@@ -167,7 +167,7 @@ public:
         // 左詰めするときのindex
         int arr_index = 0;
         int cand = 0;
-        for (unsigned int i = 0; i < arr_.size(); i++) {
+        for (std::size_t i = 0; i < arr_.size(); i++) {
             if (arr_[i] == 0) {
                 continue;
             } else {

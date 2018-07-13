@@ -46,19 +46,5 @@ void ai()
      * scoreIfRight()
      * などの関数で移動後の追加点が取得できる
     */
-
-    if (board->boardArrayIfUp() != board->boardArray()) {
-        board->up();
-    } else {
-        if (board->boardArrayIfLeft() != board->boardArray()) {
-            board->left();
-        } else {
-            if (board->boardArrayIfDown() != board->boardArray()) {
-                board->down();
-            } else {
-                board->right();
-            }
-        }
-    }
 }
 }  // namespace AI
