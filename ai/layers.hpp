@@ -28,7 +28,6 @@ public:
 
     Eigen::VectorXd forward(const Eigen::VectorXd& x)
     {
-        m_inverse_mask = Eigen::VectorXd(INPUT_SIZE_);
         Eigen::VectorXd out = x;
         // std::transform使うとgとstd::vector<double>で実装が分かれてしまう
         for (std::size_t i = 0; i < static_cast<std::size_t>(out.size()); i++) {
@@ -48,7 +47,7 @@ public:
     }
 
 private:
-    Eigen::VectorXd m_inverse_mask;
+    Eigen::VectorXd m_inverse_mask = Eigen::VectorXd::Zero(INPUT_SIZE_);
 };
 
 template <std::size_t INPUT_SIZE_, std::size_t OUTPUT_SIZE_>
@@ -62,7 +61,7 @@ public:
 
     Eigen::VectorXd forward(const Eigen::VectorXd& x)
     {
-        Eigen::VectorXd out = Eigen::VectorXd(OUTPUT_SIZE_);
+        Eigen::VectorXd out = Eigen::VectorXd::Zero(OUTPUT_SIZE_);
         for (std::size_t i = 0; i < INPUT_SIZE_; i++) {
             out[i] = 1.0 / (1.0 + std::exp(-x[i]));
         }
@@ -72,7 +71,7 @@ public:
 
     Eigen::VectorXd backward(const Eigen::VectorXd& dout)
     {
-        Eigen::VectorXd dx = Eigen::VectorXd(INPUT_SIZE_);
+        Eigen::VectorXd dx = Eigen::VectorXd::Zero(INPUT_SIZE_);
         for (std::size_t i = 0; i < INPUT_SIZE_; i++) {
             dx[i] = dout[i] * (1.0 - m_out[i]) * m_out[i];
         }
@@ -95,18 +94,16 @@ public:
         // initialize w and b
         for (std::size_t i = 0; i < OUTPUT_SIZE_; i++) {
             for (std::size_t j = 0; j < INPUT_SIZE_; j++) {
-                m_w(i, j) = Util::randUniform<double>(-0.05, 0.05);
+                // m_w(i, j) = Util::randUniform<double>(-0.05, 0.05);
+                m_w(i, j) = 1;
             }
         }
-        m_b = Eigen::VectorXd::Zero(OUTPUT_SIZE_);
-        m_dw = Eigen::MatrixXd::Zero(OUTPUT_SIZE_, INPUT_SIZE_);
-        m_db = Eigen::VectorXd::Zero(OUTPUT_SIZE_);
     }
 
     Eigen::VectorXd forward(const Eigen::VectorXd& x)
     {
         m_x = x;
-        Eigen::VectorXd out = m_w * x + m_b;
+        Eigen::VectorXd out = m_w * m_x + m_b;
         return out;
     }
     Eigen::VectorXd backward(const Eigen::VectorXd& dout)
@@ -116,22 +113,12 @@ public:
         m_db = dout;
         return dx;
     }
-    const Eigen::MatrixXd& w() const
-    {
-        return m_w;
-    }
-    Eigen::MatrixXd& wRef()
-    {
-        return m_w;
-    }
-    const Eigen::MatrixXd& b() const
-    {
-        return m_b;
-    }
-    Eigen::MatrixXd& bRef()
-    {
-        return m_b;
-    }
+    const Eigen::MatrixXd& w() const { return m_w; }
+    const Eigen::MatrixXd& dw() const { return m_dw; }
+    Eigen::MatrixXd& wRef() { return m_w; }
+    const Eigen::VectorXd& b() const { return m_b; }
+    const Eigen::VectorXd& db() const { return m_db; }
+    Eigen::VectorXd& bRef() { return m_b; }
 
 private:
     Eigen::VectorXd m_x;
@@ -144,7 +131,7 @@ private:
 template <int INPUT_SIZE_, int OUTPUT_SIZE_>
 Eigen::VectorXd softmax(const Eigen::VectorXd& x)
 {
-    Eigen::VectorXd exp_x = Eigen::VectorXd(OUTPUT_SIZE_);
+    Eigen::VectorXd exp_x = Eigen::VectorXd::Zero(OUTPUT_SIZE_);
     double max_elem_x = std::numeric_limits<double>::min();
     for (std::size_t i = 0; i < INPUT_SIZE_; i++) {
         if (max_elem_x < x[i]) {
@@ -168,9 +155,9 @@ Eigen::VectorXd softmax(const Eigen::VectorXd& x)
 template <std::size_t INPUT_SIZE_, std::size_t OUTPUT_SIZE_>
 Eigen::VectorXd crossEntropyError(const Eigen::VectorXd& y, const Eigen::VectorXd& t, const double& epsilon = 1e-7)
 {
-    Eigen::VectorXd sum(OUTPUT_SIZE_);
+    Eigen::VectorXd sum = Eigen::VectorXd::Zero(OUTPUT_SIZE_);
     for (std::size_t i = 0; i < OUTPUT_SIZE_; i++) {
-        sum[i] = -t[i] * std::log(y[i] + epsilon);
+        sum[i] = -t[i] * std::log(y[i] + epsilon) + (1 - t[i]) * std::log(1 - y[i]);
     }
     return sum;
 }
@@ -190,22 +177,15 @@ public:
     {
         m_t = t;
         m_y = softmax<INPUT_SIZE_, OUTPUT_SIZE_>(x);
-        m_loss = crossEntropyError<INPUT_SIZE_, OUTPUT_SIZE_>(m_y, m_t);
-        return m_loss;
+        return crossEntropyError<INPUT_SIZE_, OUTPUT_SIZE_>(m_y, m_t);
     }
 
     Eigen::VectorXd backward(const Eigen::VectorXd& /* dout = 1 */)
     {
-        Eigen::VectorXd dx(INPUT_SIZE_);
-
-        for (std::size_t i = 0; i < OUTPUT_SIZE_; i++) {
-            dx[i] = (m_y[i] - m_t[i]);
-        }
-        return dx;
+        return m_y - m_t;
     }
 
 private:
-    Eigen::VectorXd m_loss = Eigen::VectorXd::Zero(INPUT_SIZE_);
     Eigen::VectorXd m_y = Eigen::VectorXd::Zero(INPUT_SIZE_);
     Eigen::VectorXd m_t = Eigen::VectorXd::Zero(INPUT_SIZE_);
 };
