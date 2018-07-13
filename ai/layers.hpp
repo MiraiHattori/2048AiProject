@@ -28,7 +28,7 @@ public:
 
     Eigen::VectorXd forward(const Eigen::VectorXd& x)
     {
-        m_inverse_mask = Eigen::VectorXd(INPUT_SIZE);
+        m_inverse_mask = Eigen::VectorXd(INPUT_SIZE_);
         Eigen::VectorXd out = x;
         // std::transform使うとgとstd::vector<double>で実装が分かれてしまう
         for (std::size_t i = 0; i < static_cast<std::size_t>(out.size()); i++) {
@@ -46,9 +46,6 @@ public:
         }
         return dx;
     }
-
-    static constexpr std::size_t INPUT_SIZE = INPUT_SIZE_;
-    static constexpr std::size_t OUTPUT_SIZE = OUTPUT_SIZE_;
 
 private:
     Eigen::VectorXd m_inverse_mask;
@@ -81,9 +78,6 @@ public:
         }
         return dx;
     }
-
-    static constexpr std::size_t INPUT_SIZE = INPUT_SIZE_;
-    static constexpr std::size_t OUTPUT_SIZE = OUTPUT_SIZE_;
 
 private:
     Eigen::VectorXd m_out = Eigen::VectorXd::Zero(OUTPUT_SIZE_);
@@ -140,8 +134,6 @@ public:
     }
 
 private:
-    static constexpr std::size_t INPUT_SIZE = INPUT_SIZE_;
-    static constexpr std::size_t OUTPUT_SIZE = OUTPUT_SIZE_;
     Eigen::VectorXd m_x;
     Eigen::MatrixXd m_w = Eigen::MatrixXd::Zero(OUTPUT_SIZE_, INPUT_SIZE_);
     Eigen::VectorXd m_b = Eigen::VectorXd::Zero(OUTPUT_SIZE_);
@@ -177,8 +169,8 @@ template <std::size_t INPUT_SIZE_, std::size_t OUTPUT_SIZE_>
 Eigen::VectorXd crossEntropyError(const Eigen::VectorXd& y, const Eigen::VectorXd& t, const double& epsilon = 1e-7)
 {
     Eigen::VectorXd sum(OUTPUT_SIZE_);
-    for (std::size_t i = 0; i < static_cast<std::size_t>(t.size()); i++) {
-        sum[i] = -std::log(y[i] + epsilon);
+    for (std::size_t i = 0; i < OUTPUT_SIZE_; i++) {
+        sum[i] = -t[i] * std::log(y[i] + epsilon);
     }
     return sum;
 }
@@ -204,16 +196,13 @@ public:
 
     Eigen::VectorXd backward(const Eigen::VectorXd& /* dout = 1 */)
     {
-        Eigen::VectorXd dx(INPUT_SIZE);
+        Eigen::VectorXd dx(INPUT_SIZE_);
 
-        for (std::size_t i = 0; i < OUTPUT_SIZE; i++) {
+        for (std::size_t i = 0; i < OUTPUT_SIZE_; i++) {
             dx[i] = (m_y[i] - m_t[i]);
         }
         return dx;
     }
-
-    static constexpr std::size_t INPUT_SIZE = INPUT_SIZE_;
-    static constexpr std::size_t OUTPUT_SIZE = OUTPUT_SIZE_;
 
 private:
     Eigen::VectorXd m_loss = Eigen::VectorXd::Zero(INPUT_SIZE_);
