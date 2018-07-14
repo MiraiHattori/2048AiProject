@@ -8,20 +8,20 @@
 #include "util/random.hpp"
 
 
-template <typename TIN, typename TOUT>
 class ActivationLayer
 {
 public:
     explicit ActivationLayer() = default;
-    virtual TOUT forward(const TIN&) = 0;
-    virtual TIN backward(const TOUT&) = 0;
+    virtual Eigen::VectorXd forward(const Eigen::VectorXd&) = 0;
+    virtual Eigen::VectorXd backward(const Eigen::VectorXd&) = 0;
 };
 
 template <std::size_t INPUT_SIZE_, std::size_t OUTPUT_SIZE_>
-class Relu : public ActivationLayer<Eigen::VectorXd, Eigen::VectorXd>
+class Relu : public ActivationLayer
 {
 public:
-    explicit Relu() {
+    explicit Relu()
+    {
         static_assert(INPUT_SIZE_ > 0, "Error in class Relu; INPUT_SIZE <= 0");
         static_assert(OUTPUT_SIZE_ > 0, "Error in class Relu; OUTPUT_SIZE <= 0");
     }
@@ -30,7 +30,7 @@ public:
     {
         Eigen::VectorXd out = x;
         // std::transform使うとgとstd::vector<double>で実装が分かれてしまう
-        for (std::size_t i = 0; i < static_cast<std::size_t>(out.size()); i++) {
+        for (std::size_t i = 0; i < OUTPUT_SIZE_; i++) {
             m_inverse_mask[i] = (x[i] >= 0.0 ? 1.0 : 0.0);
             out[i] *= m_inverse_mask[i];
         }
@@ -51,10 +51,11 @@ private:
 };
 
 template <std::size_t INPUT_SIZE_, std::size_t OUTPUT_SIZE_>
-class Sigmoid : public ActivationLayer<Eigen::VectorXd, Eigen::VectorXd>
+class Sigmoid : public ActivationLayer
 {
 public:
-    explicit Sigmoid() {
+    explicit Sigmoid()
+    {
         static_assert(INPUT_SIZE_ > 0, "Error in class Sigmoid; INPUT_SIZE <= 0");
         static_assert(OUTPUT_SIZE_ > 0, "Error in class Sigmoid; OUTPUT_SIZE <= 0");
     }
@@ -84,7 +85,7 @@ private:
 
 // Eigen前提
 template <std::size_t INPUT_SIZE_, std::size_t OUTPUT_SIZE_>
-class Affine : public ActivationLayer<Eigen::VectorXd, Eigen::VectorXd>
+class Affine : public ActivationLayer
 {
 public:
     explicit Affine()
@@ -162,7 +163,6 @@ Eigen::VectorXd crossEntropyError(const Eigen::VectorXd& y, const Eigen::VectorX
     return sum;
 }
 
-
 template <std::size_t INPUT_SIZE_, std::size_t OUTPUT_SIZE_>
 class SoftmaxWithLoss
 {
@@ -184,6 +184,8 @@ public:
     {
         return m_y - m_t;
     }
+
+    static constexpr std::size_t OUTPUT_SIZE = OUTPUT_SIZE_;
 
 private:
     Eigen::VectorXd m_y = Eigen::VectorXd::Zero(INPUT_SIZE_);
