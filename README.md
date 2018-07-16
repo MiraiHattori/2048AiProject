@@ -24,8 +24,8 @@ $ make
 $ ./main
 ```
 
-- 2048のAIは `ai/ai.cpp` にある `void ai()` という関数内を変更して書いてください。
-  - You can improve the AI solver in function `void ai()` in file `ai/ai.cpp`
+- 2048のAIは `ai/ai.cpp` にある `void init(), void initGame(), void chooseMove()` という関数内を変更して書いてください。
+  - You can improve the AI solver in function `void init(), void initGame(), void chooseMove()` in file `ai/ai.cpp`
   
 - `board->boardArray()`で盤面の状態を取得できます。`const std::array<std::array<int, ROW_SIZE>, COL_SIZE>&`型で取得することができます。
   - You can get board data by `board->boardArray()`. The return type is `const std::array<std::array<int, ROW_SIZE>, COL_SIZE>&`.
