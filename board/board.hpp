@@ -15,18 +15,19 @@ using Params::COL_SIZE;
 namespace Board
 {
 
+enum class Manipulation : int {
+    None = 0,
+    Up,
+    Left,
+    Down,
+    Right,
+};
+
 template <int ROW_SIZE_, int COL_SIZE_>
 class Board
 {
 public:
     using BoardArray = std::array<std::array<int, COL_SIZE_>, ROW_SIZE_>;
-    enum class Manipulation : int {
-        None = 0,
-        Up,
-        Left,
-        Down,
-        Right,
-    };
 
     explicit Board()
     {
