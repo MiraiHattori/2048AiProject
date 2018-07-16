@@ -2,9 +2,11 @@
 
 #include <cmath>
 #include <functional>
-#include <iostream>
 #include <numeric>
+
 #include <Eigen/Core>
+
+#include "ai/weight_optimizer.hpp"
 #include "util/random.hpp"
 
 
@@ -46,6 +48,12 @@ public:
         return dx;
     }
 
+    /*
+     * 内部パラメータを学習可能か
+     * (学習可能な場合、updateWeight(const std::shared_ptr<WeightOptimizer>& optimizer)関数が必要)
+     */
+    static constexpr bool HAS_WEIGHT = false;
+
 private:
     Eigen::VectorXd m_inverse_mask = Eigen::VectorXd::Zero(INPUT_SIZE_);
 };
@@ -79,6 +87,12 @@ public:
         return dx;
     }
 
+    /*
+     * 内部パラメータを学習可能か
+     * (学習可能な場合、updateWeight(const std::shared_ptr<WeightOptimizer>& optimizer)関数が必要)
+     */
+    static constexpr bool HAS_WEIGHT = false;
+
 private:
     Eigen::VectorXd m_out = Eigen::VectorXd::Zero(OUTPUT_SIZE_);
 };
@@ -95,8 +109,7 @@ public:
         // initialize w and b
         for (std::size_t i = 0; i < OUTPUT_SIZE_; i++) {
             for (std::size_t j = 0; j < INPUT_SIZE_; j++) {
-                // m_w(i, j) = Util::randUniform<double>(-0.05, 0.05);
-                m_w(i, j) = 1;
+                m_w(i, j) = Util::randUniform<double>(-1, 1);
             }
         }
     }
@@ -109,17 +122,28 @@ public:
     }
     Eigen::VectorXd backward(const Eigen::VectorXd& dout)
     {
-        Eigen::VectorXd dx = dout * m_x.transpose();
-        m_dw = m_x.transpose() * dout;
+        Eigen::VectorXd dx = m_w.transpose() * dout;
+        m_dw = dout * m_x.transpose();
         m_db = dout;
         return dx;
     }
+
+    // updateWeight関数があると重みがupdateできるようになる
+    void updateWeight(const std::shared_ptr<WeightOptimizer>& optimizer) {
+        m_w = optimizer->updateWeight(m_w, m_dw);
+        m_b = optimizer->updateWeight(m_b, m_db);
+    }
+
     const Eigen::MatrixXd& w() const { return m_w; }
     const Eigen::MatrixXd& dw() const { return m_dw; }
-    Eigen::MatrixXd& wRef() { return m_w; }
     const Eigen::VectorXd& b() const { return m_b; }
     const Eigen::VectorXd& db() const { return m_db; }
-    Eigen::VectorXd& bRef() { return m_b; }
+
+    /*
+     * 内部パラメータを学習可能か
+     * (学習可能な場合、updateWeight(const std::shared_ptr<WeightOptimizer>& optimizer)関数が必要)
+     */
+    static constexpr bool HAS_WEIGHT = true;
 
 private:
     Eigen::VectorXd m_x;
@@ -154,11 +178,13 @@ Eigen::VectorXd softmax(const Eigen::VectorXd& x)
 
 // 教師あり
 template <std::size_t INPUT_SIZE_, std::size_t OUTPUT_SIZE_>
-Eigen::VectorXd crossEntropyError(const Eigen::VectorXd& y, const Eigen::VectorXd& t, const double& epsilon = 1e-7)
+Eigen::VectorXd crossEntropyError(const Eigen::VectorXd& y,
+                                  const Eigen::VectorXd& t,
+                                  const double& epsilon = 1e-7)
 {
     Eigen::VectorXd sum = Eigen::VectorXd::Zero(OUTPUT_SIZE_);
     for (std::size_t i = 0; i < OUTPUT_SIZE_; i++) {
-        sum[i] = -t[i] * std::log(y[i] + epsilon) + (1 - t[i]) * std::log(1 - y[i]);
+        sum[i] = -(t[i] * std::log(y[i] + epsilon) + (1 - t[i]) * std::log(1 - y[i]));
     }
     return sum;
 }
@@ -186,6 +212,12 @@ public:
     }
 
     static constexpr std::size_t OUTPUT_SIZE = OUTPUT_SIZE_;
+
+    /*
+     * 内部パラメータを学習可能か
+     * (学習可能な場合、updateWeight(const std::shared_ptr<WeightOptimizer>& optimizer)関数が必要)
+     */
+    static constexpr bool HAS_WEIGHT = false;
 
 private:
     Eigen::VectorXd m_y = Eigen::VectorXd::Zero(INPUT_SIZE_);

@@ -4,6 +4,7 @@
 
 #include <Eigen/Core>
 
+#include "ai/weight_optimizer.hpp"
 
 int main()
 {

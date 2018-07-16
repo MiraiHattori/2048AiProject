@@ -50,7 +50,7 @@ function(add_test_target TESTNAME)
         GLU
         GL)
     add_custom_target(${TESTNAME} DEPENDS ${TESTNAME}_test
-    COMMAND ./${TESTNAME}_test
+    # COMMAND ./${TESTNAME}_test
     )
 endfunction(add_test_target)
 
