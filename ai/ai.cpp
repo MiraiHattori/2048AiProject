@@ -9,7 +9,18 @@
 
 namespace AI
 {
-void ai()
+
+void init()
+{
+    // initialization
+}
+
+void initGame()
+{
+    // initialization
+}
+
+void chooseMove()
 {
     using Board::board;
     using Params::ROW_SIZE;

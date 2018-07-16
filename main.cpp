@@ -13,12 +13,16 @@ int main()
         std::vector<int> turns{};
         // 風数回のゲームでのスコアをまとめておく変数
         std::vector<int> scores{};
+        // ai/ai.cppに実体のある関数。プログラム開始時のAI処理
+        AI::init();
         // 予め決められた回数のゲームを行う
         for (int i = 0; i < Params::GAME_ITERATION; i++) {
             // 1ゲーム
+            // ai/ai.cppに実体のある関数。ゲームごとのAI初期化処理
+            AI::initGame();
             while (true) {
                 // ai/ai.cppに実体のある関数。基本この中身だけ変更すれば良い
-                AI::ai();
+                AI::chooseMove();
 
                 // 選択された動作に基づいて実際に盤面を上下左右動かし、ターンや点数を更新する
                 if (not board->move()) {

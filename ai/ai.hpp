@@ -2,5 +2,7 @@
 
 namespace AI
 {
-void ai();
+void init();
+void initGame();
+void chooseMove();
 }  // namespace AI
