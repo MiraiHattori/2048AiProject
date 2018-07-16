@@ -1,8 +1,6 @@
 #include "ai/full_connected_network.hpp"
 
 #include <iostream>
-#include "ai/layers.hpp"
-#include "ai/weight_optimizer.hpp"
 
 int main()
 {

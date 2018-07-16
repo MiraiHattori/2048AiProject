@@ -144,7 +144,7 @@ public:
     {
         // TODO L2正則化などはここで実装するとよい
         Eigen::VectorXd y = this->predict(x);
-        Eigen::VectorXd loss =  m_last_layer.forward(y, t);
+        Eigen::VectorXd loss = m_last_layer.forward(y, t);
         return loss;
     }
 

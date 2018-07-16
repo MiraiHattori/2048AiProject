@@ -129,7 +129,8 @@ public:
     }
 
     // updateWeight関数があると重みがupdateできるようになる
-    void updateWeight(const std::shared_ptr<WeightOptimizer>& optimizer) {
+    void updateWeight(const std::shared_ptr<WeightOptimizer>& optimizer)
+    {
         m_w = optimizer->updateWeight(m_w, m_dw);
         m_b = optimizer->updateWeight(m_b, m_db);
     }
@@ -179,8 +180,8 @@ Eigen::VectorXd softmax(const Eigen::VectorXd& x)
 // 教師あり
 template <std::size_t INPUT_SIZE_, std::size_t OUTPUT_SIZE_>
 Eigen::VectorXd crossEntropyError(const Eigen::VectorXd& y,
-                                  const Eigen::VectorXd& t,
-                                  const double& epsilon = 1e-7)
+    const Eigen::VectorXd& t,
+    const double& epsilon = 1e-7)
 {
     Eigen::VectorXd sum = Eigen::VectorXd::Zero(OUTPUT_SIZE_);
     for (std::size_t i = 0; i < OUTPUT_SIZE_; i++) {

@@ -2,16 +2,18 @@
 
 #include <Eigen/Core>
 
-class WeightOptimizer {
+class WeightOptimizer
+{
 public:
     WeightOptimizer() = default;
     virtual Eigen::MatrixXd updateWeight(
-            const Eigen::MatrixXd& w,
-            const Eigen::MatrixXd& w_grad) const = 0;
+        const Eigen::MatrixXd& w,
+        const Eigen::MatrixXd& w_grad) const = 0;
 };
 
 // 勾配降下法: Gradient Descent
-class GD : public WeightOptimizer {
+class GD : public WeightOptimizer
+{
 public:
     /*
      * @param lambda 学習係数
@@ -20,7 +22,8 @@ public:
 
     Eigen::MatrixXd updateWeight(
         const Eigen::MatrixXd& w,
-        const Eigen::MatrixXd& w_grad) const override {
+        const Eigen::MatrixXd& w_grad) const override
+    {
         return w - m_lambda * w_grad;
     }
 
