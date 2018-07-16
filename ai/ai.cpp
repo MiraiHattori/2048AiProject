@@ -35,16 +35,16 @@ void ai()
 
     /*
      * 上下左右に移動した後の盤面を先行評価してある
-     * boardArrayIfUp(),
-     * boardArrayIfLeft(),
-     * boardArrayIfDown(),
-     * boardArrayIfRight()
-     * などの関数で移動後の盤面が取得できる
-     * scoreIfUp(),
-     * scoreIfLeft(),
-     * scoreIfDown(),
-     * scoreIfRight()
-     * などの関数で移動後の追加点が取得できる
+     * board->boardArrayIfUp(),
+     * board->boardArrayIfLeft(),
+     * board->boardArrayIfDown(),
+     * board->boardArrayIfRight()
+     * などの関数で移動後の盤面が const std::array<std::array<int, COL_SIZE>, ROW_SIZE>& 型で取得できる
+     * board->scoreIfUp(),
+     * board->scoreIfLeft(),
+     * board->scoreIfDown(),
+     * board->scoreIfRight()
+     * などの関数で移動したときの追加点が取得できる
     */
 
     if (board->boardArrayIfUp() != board->boardArray()) {
