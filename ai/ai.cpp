@@ -5,14 +5,30 @@
 
 #include <Eigen/Core>
 
+#include "ai/full_connected_network.hpp"
 #include "board/board.hpp"
 
 namespace AI
 {
 
+/* example
+    std::shared_ptr<GD> gd = std::make_shared<GD>(0.01);
+    FullConnectedNetwork<SoftmaxWithLoss<4, 4>, Affine<4, 10>, Relu<10, 10>, Affine<10, 4>> net{gd};
+    for (int i = 0; i < 100000; i++) {
+        net.learn(x0, t0);
+        net.learn(x1, t1);
+    }
+    std::cout << net.predict(x0) << std::endl;
+*/
+
+std::shared_ptr<GD> gd = nullptr;
+std::unique_ptr<FullConnectedNetwork<SoftmaxWithLoss<4, 4>, Affine<4, 10>, Relu<10, 10>, Affine<10, 4>>> q = nullptr;
+
 void init()
 {
     // initialization
+    gd = std::make_shared<GD>(0.01);
+    q = std::make_unique<FullConnectedNetwork<SoftmaxWithLoss<4, 4>, Affine<4, 10>, Relu<10, 10>, Affine<10, 4>>>(gd);
 }
 
 void initGame()
@@ -57,5 +73,17 @@ void chooseMove()
      * board->scoreIfRight()
      * などの関数で移動したときの追加点が取得できる
     */
+
+    /*
+     * target = r(s, a) + 0.99 * q(s', a');
+     * loss = target - q(s, a);
+     * q(s, a) = q(s, a) + 0.1 * loss;
+     * percentage = randUniform(0.0, 100.0);
+     * if (percentage < EPSILON) {
+     *     a = random;
+     * }
+     */
 }
+
+
 }  // namespace AI
