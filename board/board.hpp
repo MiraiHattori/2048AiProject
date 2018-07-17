@@ -128,7 +128,7 @@ public:
             additional_score = m_additional_score_if_right;
             break;
         default:
-            std::cout << "Unknown Manipulation" << std::endl;
+            // std::cout << "Unknown Manipulation" << std::endl;
             additional_score = 0;
             return false;
             break;

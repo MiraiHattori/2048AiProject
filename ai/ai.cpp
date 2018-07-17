@@ -133,8 +133,8 @@ void chooseMove()
         board->right();
         break;
     default:
-        std::cout << "Unknown Manipulation detected; manip is "
-                  << static_cast<int>(manip) << std::endl;
+        // std::cout << "Unknown Manipulation detected; manip is "
+        //           << static_cast<int>(manip) << std::endl;
         break;
     }
     Eigen::VectorXd /* 4d */ rewards = Eigen::VectorXd::Zero(4);
