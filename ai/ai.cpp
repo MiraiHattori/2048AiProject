@@ -98,7 +98,7 @@ void chooseMove()
      */
     Eigen::VectorXd /* 4d */ acts = q->predict(s);
     // std::cout << "s: " << s.transpose() << std::endl;
-    double max = std::numeric_limits<double>::min();
+    double max = -std::numeric_limits<double>::min();
     Manipulation manip = Manipulation::None;
     // std::cout << "acts: " << acts.transpose() << std::endl;
     std::array<std::array<std::array<int, COL_SIZE>, ROW_SIZE>, 4> board_array_ifs;
@@ -110,11 +110,13 @@ void chooseMove()
         if (max < acts[i] and board->boardArray() != board_array_ifs[i]) {
             max = acts[i];
             manip = static_cast<Manipulation>(i + 1);
+            // std::cout << "prefferd manip is " << i + 1 << std::endl;
         }
     }
     // epsilon-greedy でときどきランダムな行動
     if (Util::randUniform(0.0, 100.0) < 10.0) {
         manip = static_cast<Manipulation>(Util::randUniform(1, 5));
+        // std::cout << "epsilon greedy manip is " << static_cast<int>(manip) << std::endl;
     }
     // std::cout << "manip: " << static_cast<int>(manip) << std::endl;
     switch (manip) {
@@ -148,6 +150,7 @@ void chooseMove()
     // std::cout << "next_qs: " << next_qs.transpose() << std::endl;
     Eigen::VectorXd /* 4d */ targets = rewards + GANMA * next_qs;
     Eigen::VectorXd /* 4d */ loss = targets - next_qs;
+    // std::cout << "targets: " << targets.transpose() << std::endl;
     q->setLossAndBackProp(s, loss);
 }
 

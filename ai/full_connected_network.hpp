@@ -174,7 +174,7 @@ public:
         // targetは最終的に使用されないのでなんでもよい
         m_loss = this->loss(x, x);
         m_loss = loss;
-        std::cout << "loss: " << loss.transpose() << std::endl;
+        // std::cout << "loss: " << loss.transpose() << std::endl;
         m_last_layer.setLoss(loss);
         Eigen::VectorXd dout = Eigen::VectorXd::Ones(LAST_LAYER::OUTPUT_SIZE);
         dout = m_last_layer.backward(dout);
