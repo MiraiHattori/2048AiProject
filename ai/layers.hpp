@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <functional>
+#include <memory>
 #include <numeric>
 
 #include <Eigen/Core>
@@ -158,7 +159,7 @@ template <int INPUT_SIZE_, int OUTPUT_SIZE_>
 Eigen::VectorXd softmax(const Eigen::VectorXd& x)
 {
     Eigen::VectorXd exp_x = Eigen::VectorXd::Zero(OUTPUT_SIZE_);
-    double max_elem_x = std::numeric_limits<double>::min();
+    double max_elem_x = -std::numeric_limits<double>::max();
     for (std::size_t i = 0; i < INPUT_SIZE_; i++) {
         if (max_elem_x < x[i]) {
             max_elem_x = x[i];
