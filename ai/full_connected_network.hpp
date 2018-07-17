@@ -150,7 +150,6 @@ public:
 
     void backProp(const Eigen::VectorXd& x, const Eigen::VectorXd& t)
     {
-        // forward; disposing return value.
         m_loss = this->loss(x, t);
         Eigen::VectorXd dout = Eigen::VectorXd::Ones(LAST_LAYER::OUTPUT_SIZE);
         dout = m_last_layer.backward(dout);
@@ -167,6 +166,20 @@ public:
     void updateWeight()
     {
         WrapFunc<HIDDEN_LAYERS...>::updateWeight(m_optimizer, m_layers);
+    }
+
+    // TODO 最終層にlossを打ち込むでっち上げ
+    void setLossAndBackProp(const Eigen::VectorXd& x, const Eigen::VectorXd& loss)
+    {
+        // targetは最終的に使用されないのでなんでもよい
+        m_loss = this->loss(x, x);
+        m_loss = loss;
+        std::cout << "loss: " << loss.transpose() << std::endl;
+        m_last_layer.setLoss(loss);
+        Eigen::VectorXd dout = Eigen::VectorXd::Ones(LAST_LAYER::OUTPUT_SIZE);
+        dout = m_last_layer.backward(dout);
+        dout = WrapFunc<HIDDEN_LAYERS...>::backProp(dout, m_layers);
+        this->updateWeight();
     }
 
 private:

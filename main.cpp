@@ -10,9 +10,9 @@ int main()
     Board::board = std::make_unique<Board::Board<ROW_SIZE, COL_SIZE>>();
     try {
         // 複数回のゲームでのターン数をまとめておく変数
-        std::vector<int> turns{};
+        std::vector<double> turns{};
         // 風数回のゲームでのスコアをまとめておく変数
-        std::vector<int> scores{};
+        std::vector<double> scores{};
         // ai/ai.cppに実体のある関数。プログラム開始時のAI処理
         AI::init();
         // 予め決められた回数のゲームを行う
@@ -57,11 +57,11 @@ int main()
         }
         std::cout << "Total iteration: " << Params::GAME_ITERATION << std::endl;
         std::cout << "Turn average: "
-                  << static_cast<double>(std::accumulate(turns.begin(), turns.end(), 0))
+                  << std::accumulate(turns.begin(), turns.end(), 0)
                          / turns.size()
                   << std::endl;
         std::cout << "Score average: "
-                  << static_cast<double>(std::accumulate(scores.begin(), scores.end(), 0))
+                  << std::accumulate(scores.begin(), scores.end(), 0)
                          / scores.size()
                   << std::endl;
 

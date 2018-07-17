@@ -109,7 +109,7 @@ public:
         // initialize w and b
         for (std::size_t i = 0; i < OUTPUT_SIZE_; i++) {
             for (std::size_t j = 0; j < INPUT_SIZE_; j++) {
-                m_w(i, j) = Util::randUniform<double>(-1, 1);
+                m_w(i, j) = Util::randUniform<double>(-1.0, 1.0);
             }
         }
     }
@@ -196,11 +196,14 @@ class SoftmaxWithLoss
 public:
     explicit SoftmaxWithLoss()
     {
-        static_assert(INPUT_SIZE_ > 0, "Error in class SoftMaxWithLoss; INPUT_SIZE <= 0");
-        static_assert(OUTPUT_SIZE_ > 0, "Error in class SoftMaxWithLoss; OUTPUT_SIZE <= 0");
+        static_assert(INPUT_SIZE_ > 0,
+            "Error in class SoftMaxWithLoss; INPUT_SIZE <= 0");
+        static_assert(OUTPUT_SIZE_ > 0,
+            "Error in class SoftMaxWithLoss; OUTPUT_SIZE <= 0");
     }
 
-    Eigen::VectorXd forward(const Eigen::VectorXd& x, const Eigen::VectorXd& t)
+    Eigen::VectorXd
+    forward(const Eigen::VectorXd& x, const Eigen::VectorXd& t)
     {
         m_t = t;
         m_y = softmax<INPUT_SIZE_, OUTPUT_SIZE_>(x);
@@ -210,6 +213,14 @@ public:
     Eigen::VectorXd backward(const Eigen::VectorXd& /* dout = 1 */)
     {
         return m_y - m_t;
+    }
+
+    // TODO これはpatch
+    void setLoss(const Eigen::VectorXd& loss)
+    {
+        // m_t - m_y = lossとするようにでっち上げ
+        // m_tを変えてあげる
+        m_t = m_y + loss;
     }
 
     static constexpr std::size_t OUTPUT_SIZE = OUTPUT_SIZE_;
