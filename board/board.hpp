@@ -218,6 +218,7 @@ public:
 
     void flushDown()
     {
+        m_additional_score_if_down = 0;
         for (int col = 0; col < COL_SIZE_; col++) {
             std::array<int, ROW_SIZE_> a{};
             for (int row = 0; row < ROW_SIZE_; row++) {
@@ -234,6 +235,7 @@ public:
 
     void flushRight()
     {
+        m_additional_score_if_right = 0;
         for (int row = 0; row < ROW_SIZE_; row++) {
             std::array<int, COL_SIZE_> a{};
             for (int col = 0; col < COL_SIZE_; col++) {
