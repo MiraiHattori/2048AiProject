@@ -16,6 +16,6 @@ constexpr bool PRINT_SCORE = false;
 
 // 毎ゲーム表示するデバッグ用出力フラグ
 constexpr bool PRINT_GAMEOVER = false;
-constexpr bool PRINT_RESULT = true;
+constexpr bool PRINT_RESULT = false;
 
 }  // namespace Params
