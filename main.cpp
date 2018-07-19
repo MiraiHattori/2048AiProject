@@ -56,6 +56,8 @@ int main()
             }
             board->clear();
             if (i % 10000 == 0) {
+                std::cout << "Weights and Biases" << std::endl;
+                AI::printWeight();
                 std::cout << "Total iteration: " << i + 1 << std::endl;
                 std::cout << "Turn average: "
                           << std::accumulate(turns.begin(), turns.end(), 0)

@@ -230,20 +230,18 @@ public:
         m_b = optimizer->updateWeight(m_b, m_db, 0.001);
     }
     // printWeight関数
-    void printWeight(const bool& print)
+    void printWeight()
     {
-        if (print) {
-            /*
+        /*
             std::cout << "w: " << std::endl;
             std::cout << m_w << std::endl;
             std::cout << "b.transpose(): " << std::endl;
             std::cout << m_b.transpose() << std::endl;
             */
-            std::cout << "dw: " << std::endl;
-            std::cout << m_dw << std::endl;
-            std::cout << "db.transpose(): " << std::endl;
-            std::cout << m_db.transpose() << std::endl;
-        }
+        std::cout << "dw: " << std::endl;
+        std::cout << m_dw << std::endl;
+        std::cout << "db.transpose(): " << std::endl;
+        std::cout << m_db.transpose() << std::endl;
     }
 
     const Eigen::MatrixXd& w() const { return m_w; }
@@ -253,7 +251,7 @@ public:
 
     /*
      * 内部パラメータを学習可能か
-     * (学習可能な場合、updateWeight(const std::shared_ptr<WeightOptimizer>& optimizer)関数とprintWeight(const bool& print)関数が必要)
+     * (学習可能な場合、updateWeight(const std::shared_ptr<WeightOptimizer>& optimizer)関数とprintWeight()関数が必要)
      */
     static constexpr bool HAS_WEIGHT = true;
 
@@ -300,7 +298,7 @@ public:
         Eigen::MatrixXd dx = m_w.transpose() * dout;
         m_dw = dout * m_x.transpose();
         // バイアスは縦ベクトルになるように行方向に足して平均を取る
-        for (std::size_t i = 0; i< OUTPUT_SIZE_; i++) {
+        for (std::size_t i = 0; i < OUTPUT_SIZE_; i++) {
             m_db[i] = dout.row(i).mean();
         }
         return dx;
@@ -313,20 +311,18 @@ public:
         m_b = optimizer->updateWeight(m_b, m_db, 0.001);
     }
     // printWeight関数
-    void printWeight(const bool& print)
+    void printWeight()
     {
-        if (print) {
-            std::cout << "w: " << std::endl;
-            std::cout << m_w << std::endl;
-            std::cout << "b.transpose(): " << std::endl;
-            std::cout << m_b.transpose() << std::endl;
-            /*
+        std::cout << "w: " << std::endl;
+        std::cout << m_w << std::endl;
+        std::cout << "b.transpose(): " << std::endl;
+        std::cout << m_b.transpose() << std::endl;
+        /*
             std::cout << "dw: " << std::endl;
             std::cout << m_dw << std::endl;
             std::cout << "db.transpose(): " << std::endl;
             std::cout << m_db.transpose() << std::endl;
             */
-        }
     }
 
     const Eigen::MatrixXd& w() const { return m_w; }
@@ -336,7 +332,7 @@ public:
 
     /*
      * 内部パラメータを学習可能か
-     * (学習可能な場合、updateWeight(const std::shared_ptr<WeightOptimizer>& optimizer)関数とprintWeight(const bool& print)関数が必要)
+     * (学習可能な場合、updateWeight(const std::shared_ptr<WeightOptimizer>& optimizer)関数とprintWeight()関数が必要)
      */
     static constexpr bool HAS_WEIGHT = true;
 
@@ -438,9 +434,9 @@ public:
     explicit Dummy()
     {
         static_assert(INPUT_SIZE_ > 0,
-                      "Error in class Dummy; INPUT_SIZE <= 0");
+            "Error in class Dummy; INPUT_SIZE <= 0");
         static_assert(OUTPUT_SIZE_ > 0,
-                      "Error in class Dummy; OUTPUT_SIZE <= 0");
+            "Error in class Dummy; OUTPUT_SIZE <= 0");
     }
 
     Eigen::VectorXd
@@ -480,9 +476,9 @@ public:
     explicit DummyBatch()
     {
         static_assert(INPUT_SIZE_ > 0,
-                      "Error in class DummyBatch; INPUT_SIZE <= 0");
+            "Error in class DummyBatch; INPUT_SIZE <= 0");
         static_assert(OUTPUT_SIZE_ > 0,
-                      "Error in class DummyBatch; OUTPUT_SIZE <= 0");
+            "Error in class DummyBatch; OUTPUT_SIZE <= 0");
     }
 
     Eigen::MatrixXd

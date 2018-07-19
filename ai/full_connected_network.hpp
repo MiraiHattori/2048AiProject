@@ -36,14 +36,20 @@ struct WrapFunc_ {
             std::get<INT::value>(layers).backward(dout), layers);
     }
     static void updateWeight_(const std::shared_ptr<WeightOptimizer>& optimizer,
-        std::tuple<HIDDEN_LAYERS...>& layers, const bool& print)
+        std::tuple<HIDDEN_LAYERS...>& layers)
     {
         if constexpr (std::get<INT::value>(layers).HAS_WEIGHT) {
             std::get<INT::value>(layers).updateWeight(optimizer);
-            std::get<INT::value>(layers).printWeight(print);
         }
         WrapFunc_<WrapInt<INT::value_plus_1>, HIDDEN_LAYERS...>::updateWeight_(
-            optimizer, layers, print);
+            optimizer, layers);
+    }
+    static void printWeight_(std::tuple<HIDDEN_LAYERS...>& layers)
+    {
+        if constexpr (std::get<INT::value>(layers).HAS_WEIGHT) {
+            std::get<INT::value>(layers).printWeight();
+        }
+        WrapFunc_<WrapInt<INT::value_plus_1>, HIDDEN_LAYERS...>::printWeight_(layers);
     }
 };
 
@@ -64,14 +70,21 @@ struct WrapFunc_<WrapInt<0>, HIDDEN_LAYERS...> {
             std::get<sizeof...(HIDDEN_LAYERS) - 1>(layers).backward(dout), layers);
     }
     static void updateWeight_(const std::shared_ptr<WeightOptimizer>& optimizer,
-        std::tuple<HIDDEN_LAYERS...>& layers, const bool& print)
+        std::tuple<HIDDEN_LAYERS...>& layers)
     {
         if constexpr (std::get<0>(layers).HAS_WEIGHT) {
             std::get<0>(layers).updateWeight(optimizer);
-            std::get<0>(layers).printWeight(print);
         }
         WrapFunc_<WrapInt<1>, HIDDEN_LAYERS...>::updateWeight_(
-            optimizer, layers, print);
+            optimizer, layers);
+    }
+
+    static void printWeight_(std::tuple<HIDDEN_LAYERS...>& layers)
+    {
+        if constexpr (std::get<0>(layers).HAS_WEIGHT) {
+            std::get<0>(layers).printWeight();
+        }
+        WrapFunc_<WrapInt<1>, HIDDEN_LAYERS...>::printWeight_(layers);
     }
 };
 
@@ -90,11 +103,16 @@ struct WrapFunc_<WrapInt<sizeof...(HIDDEN_LAYERS) - 1>, HIDDEN_LAYERS...> {
         return std::get<0>(layers).backward(dout);
     }
     static void updateWeight_(const std::shared_ptr<WeightOptimizer>& optimizer,
-        std::tuple<HIDDEN_LAYERS...>& layers, const bool& print)
+        std::tuple<HIDDEN_LAYERS...>& layers)
     {
         if constexpr (std::get<sizeof...(HIDDEN_LAYERS) - 1>(layers).HAS_WEIGHT) {
             std::get<sizeof...(HIDDEN_LAYERS) - 1>(layers).updateWeight(optimizer);
-            std::get<sizeof...(HIDDEN_LAYERS) - 1>(layers).printWeight(print);
+        }
+    }
+    static void printWeight_(std::tuple<HIDDEN_LAYERS...>& layers)
+    {
+        if constexpr (std::get<sizeof...(HIDDEN_LAYERS) - 1>(layers).HAS_WEIGHT) {
+            std::get<sizeof...(HIDDEN_LAYERS) - 1>(layers).printWeight();
         }
     }
 };
@@ -114,9 +132,13 @@ struct WrapFunc {
         return WrapFunc_<WrapInt<0>, HIDDEN_LAYERS...>::backProp_(dout, layers);
     }
     static void updateWeight(const std::shared_ptr<WeightOptimizer>& optimizer,
-        std::tuple<HIDDEN_LAYERS...>& layers, const bool& print)
+        std::tuple<HIDDEN_LAYERS...>& layers)
     {
-        WrapFunc_<WrapInt<0>, HIDDEN_LAYERS...>::updateWeight_(optimizer, layers, print);
+        WrapFunc_<WrapInt<0>, HIDDEN_LAYERS...>::updateWeight_(optimizer, layers);
+    }
+    static void printWeight(std::tuple<HIDDEN_LAYERS...>& layers)
+    {
+        WrapFunc_<WrapInt<0>, HIDDEN_LAYERS...>::printWeight_(layers);
     }
 };
 
@@ -138,14 +160,20 @@ struct WrapFuncBatch_ {
             std::get<INT::value>(layers).backward(dout), layers);
     }
     static void updateWeight_(const std::shared_ptr<WeightOptimizer>& optimizer,
-        std::tuple<HIDDEN_LAYERS...>& layers, const bool& print)
+        std::tuple<HIDDEN_LAYERS...>& layers)
     {
         if constexpr (std::get<INT::value>(layers).HAS_WEIGHT) {
             std::get<INT::value>(layers).updateWeight(optimizer);
-            std::get<INT::value>(layers).printWeight(print);
         }
         WrapFuncBatch_<WrapInt<INT::value_plus_1>, HIDDEN_LAYERS...>::updateWeight_(
-            optimizer, layers, print);
+            optimizer, layers);
+    }
+    static void printWeight_(std::tuple<HIDDEN_LAYERS...>& layers)
+    {
+        if constexpr (std::get<INT::value>(layers).HAS_WEIGHT) {
+            std::get<INT::value>(layers).printWeight();
+        }
+        WrapFuncBatch_<WrapInt<INT::value_plus_1>, HIDDEN_LAYERS...>::printWeight_(layers);
     }
 };
 
@@ -166,14 +194,20 @@ struct WrapFuncBatch_<WrapInt<0>, HIDDEN_LAYERS...> {
             std::get<sizeof...(HIDDEN_LAYERS) - 1>(layers).backward(dout), layers);
     }
     static void updateWeight_(const std::shared_ptr<WeightOptimizer>& optimizer,
-        std::tuple<HIDDEN_LAYERS...>& layers, const bool& print)
+        std::tuple<HIDDEN_LAYERS...>& layers)
     {
         if constexpr (std::get<0>(layers).HAS_WEIGHT) {
             std::get<0>(layers).updateWeight(optimizer);
-            std::get<0>(layers).printWeight(print);
         }
         WrapFuncBatch_<WrapInt<1>, HIDDEN_LAYERS...>::updateWeight_(
-            optimizer, layers, print);
+            optimizer, layers);
+    }
+    static void printWeight_(std::tuple<HIDDEN_LAYERS...>& layers)
+    {
+        if constexpr (std::get<0>(layers).HAS_WEIGHT) {
+            std::get<0>(layers).printWeight();
+        }
+        WrapFuncBatch_<WrapInt<1>, HIDDEN_LAYERS...>::printWeight_(layers);
     }
 };
 
@@ -192,11 +226,16 @@ struct WrapFuncBatch_<WrapInt<sizeof...(HIDDEN_LAYERS) - 1>, HIDDEN_LAYERS...> {
         return std::get<0>(layers).backward(dout);
     }
     static void updateWeight_(const std::shared_ptr<WeightOptimizer>& optimizer,
-        std::tuple<HIDDEN_LAYERS...>& layers, const bool& print)
+        std::tuple<HIDDEN_LAYERS...>& layers)
     {
         if constexpr (std::get<sizeof...(HIDDEN_LAYERS) - 1>(layers).HAS_WEIGHT) {
             std::get<sizeof...(HIDDEN_LAYERS) - 1>(layers).updateWeight(optimizer);
-            std::get<sizeof...(HIDDEN_LAYERS) - 1>(layers).printWeight(print);
+        }
+    }
+    static void printWeight_(std::tuple<HIDDEN_LAYERS...>& layers)
+    {
+        if constexpr (std::get<sizeof...(HIDDEN_LAYERS) - 1>(layers).HAS_WEIGHT) {
+            std::get<sizeof...(HIDDEN_LAYERS) - 1>(layers).printWeight();
         }
     }
 };
@@ -216,9 +255,13 @@ struct WrapFuncBatch {
         return WrapFuncBatch_<WrapInt<0>, HIDDEN_LAYERS...>::backProp_(dout, layers);
     }
     static void updateWeight(const std::shared_ptr<WeightOptimizer>& optimizer,
-        std::tuple<HIDDEN_LAYERS...>& layers, const bool& print)
+        std::tuple<HIDDEN_LAYERS...>& layers)
     {
-        WrapFuncBatch_<WrapInt<0>, HIDDEN_LAYERS...>::updateWeight_(optimizer, layers, print);
+        WrapFuncBatch_<WrapInt<0>, HIDDEN_LAYERS...>::updateWeight_(optimizer, layers);
+    }
+    static void printWeight(std::tuple<HIDDEN_LAYERS...>& layers)
+    {
+        WrapFuncBatch_<WrapInt<0>, HIDDEN_LAYERS...>::printWeight_(layers);
     }
 };
 }  // anonymous namespace
@@ -261,26 +304,31 @@ public:
         dout = WrapFunc<HIDDEN_LAYERS...>::backProp(dout, m_layers);
     }
 
-    void learn(const Eigen::VectorXd& x, const Eigen::VectorXd& t, const bool& print)
+    void learn(const Eigen::VectorXd& x, const Eigen::VectorXd& t)
     {
         this->backProp(x, t);
-        this->updateWeight(print);
+        this->updateWeight();
     }
     const Eigen::VectorXd& loss() const { return m_loss; }
 
-    void updateWeight(const bool& print)
+    void updateWeight()
     {
-        WrapFunc<HIDDEN_LAYERS...>::updateWeight(m_optimizer, m_layers, print);
+        WrapFunc<HIDDEN_LAYERS...>::updateWeight(m_optimizer, m_layers);
     }
 
     // TODO 最終層にdoutを打ち込むでっち上げ
-    void setDoutAndBackProp(const Eigen::VectorXd& x, const Eigen::VectorXd& dout, const bool& print)
+    void setDoutAndBackProp(const Eigen::VectorXd& x, const Eigen::VectorXd& dout)
     {
         // lossは最終的に使用されないのでなんでもよい
         m_loss = this->loss(x, x);
         m_last_layer.setDout(dout);
         dout = WrapFunc<HIDDEN_LAYERS...>::backProp(dout, m_layers);
-        this->updateWeight(print);
+        this->updateWeight();
+    }
+
+    void printWeight()
+    {
+        WrapFunc<HIDDEN_LAYERS...>::printWeight(m_layers);
     }
 
 private:
@@ -328,26 +376,31 @@ public:
         dout = WrapFuncBatch<HIDDEN_LAYERS...>::backProp(dout, m_layers);
     }
 
-    void learn(const Eigen::MatrixXd& x, const Eigen::MatrixXd& t, const bool& print)
+    void learn(const Eigen::MatrixXd& x, const Eigen::MatrixXd& t)
     {
         this->backProp(x, t);
-        this->updateWeight(print);
+        this->updateWeight();
     }
     const Eigen::MatrixXd& loss() const { return m_loss; }
 
-    void updateWeight(const bool& print)
+    void updateWeight()
     {
-        WrapFuncBatch<HIDDEN_LAYERS...>::updateWeight(m_optimizer, m_layers, print);
+        WrapFuncBatch<HIDDEN_LAYERS...>::updateWeight(m_optimizer, m_layers);
     }
 
     // TODO 最終層にdoutを打ち込むでっち上げ
-    void setDoutAndBackProp(const Eigen::MatrixXd& x, const Eigen::MatrixXd& dout, const bool& print)
+    void setDoutAndBackProp(const Eigen::MatrixXd& x, const Eigen::MatrixXd& dout)
     {
         // lossは最終的に使用されないのでなんでもよい
         m_loss = this->loss(x, x);
         m_last_layer.setDout(dout);
         WrapFuncBatch<HIDDEN_LAYERS...>::backProp(dout, m_layers);
-        this->updateWeight(print);
+        this->updateWeight();
+    }
+
+    void printWeight()
+    {
+        WrapFuncBatch<HIDDEN_LAYERS...>::printWeight(m_layers);
     }
 
 private:

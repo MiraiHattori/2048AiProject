@@ -22,12 +22,11 @@ int main()
     t3 << 0, 0, 0, 1;
     std::shared_ptr<GD> gd = std::make_shared<GD>(0.01);
     FullConnectedNetwork<SoftmaxWithLoss<4, 4>, Affine<16, 20>, Relu<20, 20>, Affine<20, 4>> net{gd};
-    constexpr bool PRINT_WEIGHT = false;
     for (int i = 0; i < 10000; i++) {
-        net.learn(x0, t0, PRINT_WEIGHT);
-        net.learn(x1, t1, PRINT_WEIGHT);
-        net.learn(x2, t2, PRINT_WEIGHT);
-        net.learn(x3, t3, PRINT_WEIGHT);
+        net.learn(x0, t0);
+        net.learn(x1, t1);
+        net.learn(x2, t2);
+        net.learn(x3, t3);
     }
     std::cout << "net.predict(x0)" << std::endl;
     std::cout << net.predict(x0) << std::endl;

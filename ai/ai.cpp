@@ -235,8 +235,13 @@ void chooseMove()
         std::cout << "next_qs: " << std::endl;
         std::cout << next_qs_average << std::endl;
         */
-        q->setDoutAndBackProp(s_batch, dout_batch, /*print_weight = */ false);
+        q->setDoutAndBackProp(s_batch, dout_batch);
     }
+}
+
+void printWeight()
+{
+    q->printWeight();
 }
 
 

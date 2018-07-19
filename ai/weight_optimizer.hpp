@@ -11,9 +11,9 @@ public:
         const Eigen::MatrixXd& w_grad) const = 0;
     // TODO デバッグ用
     virtual Eigen::MatrixXd updateWeight(
-            const Eigen::MatrixXd& w,
-            const Eigen::MatrixXd& w_grad,
-            const double& lambda) const = 0;
+        const Eigen::MatrixXd& w,
+        const Eigen::MatrixXd& w_grad,
+        const double& lambda) const = 0;
 };
 
 // 勾配降下法: Gradient Descent
@@ -33,9 +33,9 @@ public:
     }
     // TODO デバッグ用
     Eigen::MatrixXd updateWeight(
-            const Eigen::MatrixXd& w,
-            const Eigen::MatrixXd& w_grad,
-            const double& lambda) const
+        const Eigen::MatrixXd& w,
+        const Eigen::MatrixXd& w_grad,
+        const double& lambda) const
     {
         return w - lambda * w_grad;
     }
@@ -43,4 +43,3 @@ public:
 private:
     double m_lambda{};
 };
-
