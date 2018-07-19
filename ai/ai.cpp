@@ -13,12 +13,9 @@
 namespace AI
 {
 
-// TODO 埋め込みされている
-// 何試行ごとに学習するか
-constexpr int BATCH = 10000;
 
 std::shared_ptr<GD> gd = nullptr;
-using QNet = FullConnectedNetworkBatch<DummyBatch<4, 4>, BATCH, AffineBatch<16, 40>, ReluBatch<40, 40>, AffineBatch<40, 4>>;
+using QNet = FullConnectedNetworkBatch<DummyBatch<4, 4>, AffineBatch<16, 40>, ReluBatch<40, 40>, AffineBatch<40, 4>>;
 std::unique_ptr<QNet> q = nullptr;
 
 void init()
@@ -47,15 +44,16 @@ Eigen::VectorXd boardArrayToEigenVec(const std::array<std::array<int, Params::CO
 struct Experience {
     explicit Experience() = default;
     explicit Experience(const Eigen::VectorXd& s_now,
-                       const Eigen::VectorXd& rs,
-                        const std::array<Eigen::VectorXd, 4>& s_nexts)
-            : s_now(s_now), rs(rs), s_nexts(s_nexts) {}
-        Eigen::VectorXd s_now;
-        Eigen::VectorXd rs;
-        std::array<Eigen::VectorXd, 4> s_nexts;
+        const Eigen::VectorXd& rs,
+        const std::array<Eigen::VectorXd, 4>& s_nexts)
+        : s_now(s_now), rs(rs), s_nexts(s_nexts) {}
+    Eigen::VectorXd s_now;
+    Eigen::VectorXd rs;
+    std::array<Eigen::VectorXd, 4> s_nexts;
 };
 
-void chooseMove() {
+void chooseMove()
+{
     using Board::board;
     using Board::Manipulation;
     using Params::ROW_SIZE;
@@ -63,12 +61,11 @@ void chooseMove() {
 
     // board->boardArray()で、2048の現在の盤面がstd::array<std::array<int, COL_SIZE>, ROW_SIZE>で返ってきます
     if constexpr (Params::PRINT_BOARD) {
-        for (const auto &row : board->boardArray()) {
-            for (const auto &cell : row) {
+        for (const auto& row : board->boardArray()) {
+            for (const auto& cell : row) {
                 std::cout << std::fixed
                           << std::setw(Params::MAX_DIGIT_TO_SHOW)
-                          << (cell == 0 ? 0 : Util::power(2u,
-                                                          static_cast<unsigned int>(cell)));
+                          << (cell == 0 ? 0 : Util::power(2u, static_cast<unsigned int>(cell)));
             }
             std::cout << std::endl;
         }
@@ -137,70 +134,73 @@ void chooseMove() {
     }
     */
     switch (manip) {
-        case Manipulation::Up:
-            board->up();
-            break;
-        case Manipulation::Left:
-            board->left();
-            break;
-        case Manipulation::Down:
-            board->down();
-            break;
-        case Manipulation::Right:
-            board->right();
-            break;
-        default:
-            break;
+    case Manipulation::Up:
+        board->up();
+        break;
+    case Manipulation::Left:
+        board->left();
+        break;
+    case Manipulation::Down:
+        board->down();
+        break;
+    case Manipulation::Right:
+        board->right();
+        break;
+    default:
+        break;
     }
 
     Eigen::VectorXd /* 4d */ rewards(4);
     std::array<bool, 4> can_go(
-            {board_array_ifs[0] != board->boardArray(),
+        {board_array_ifs[0] != board->boardArray(),
             board_array_ifs[1] != board->boardArray(),
             board_array_ifs[2] != board->boardArray(),
             board_array_ifs[3] != board->boardArray()});
     rewards << (can_go[0] ? 1.0 : 0.0),
-            (can_go[1] ? 1.0 : 0.0),
-            (can_go[2] ? 1.0 : 0.0),
-            (can_go[3] ? 1.0 : 0.0);
+        (can_go[1] ? 1.0 : 0.0),
+        (can_go[2] ? 1.0 : 0.0),
+        (can_go[3] ? 1.0 : 0.0);
 
     // 学習段
-    // 過去のデータ
+    // TODO 埋め込みされている
+    // 何試行ごとに学習するか
+    constexpr int BATCH_SIZE = 10000;
+    constexpr int SAMPLE_SIZE = 1000;
+
     static int cnt = -1;
     cnt++;
-    static std::array<Experience, BATCH> data;
-    data[cnt % BATCH] = Experience(s, rewards, board_array_ifs_eigen);
+    static std::array<Experience, BATCH_SIZE> data;
+    // Experience Replayのためデータをためておく
+    data[cnt % BATCH_SIZE] = Experience(s, rewards, board_array_ifs_eigen);
 
     // 学習のデータ
-    if ((cnt + BATCH) % BATCH == BATCH - 1) {
+    if ((cnt + BATCH_SIZE) % BATCH_SIZE == BATCH_SIZE - 1) {
 
         // std::sampleで無作為抽出
         std::vector<Experience> e_selected;
-        constexpr int SAMPLE = 1000;
         static std::random_device seed_gen;
         static std::mt19937 engine(seed_gen());
         std::sample(data.begin(), data.end(), std::back_inserter(e_selected),
-                    SAMPLE, engine);
+            SAMPLE_SIZE, engine);
         // 長いほうがいいので
         /* constexpr double GAMMA = 1.00; */
 
-        Eigen::MatrixXd s_batch(16, SAMPLE);
-        Eigen::MatrixXd /* 4d */ rewards_batch(4, SAMPLE);
-        Eigen::MatrixXd /* 4d */ next_qs_batch(4, SAMPLE);
-        for (int i = 0; i < SAMPLE; i++) {
+        Eigen::MatrixXd s_batch(16, SAMPLE_SIZE);
+        Eigen::MatrixXd /* 4d */ rewards_batch(4, SAMPLE_SIZE);
+        Eigen::MatrixXd /* 4d */ next_qs_batch(4, SAMPLE_SIZE);
+        for (int i = 0; i < SAMPLE_SIZE; i++) {
             s_batch.col(i) = e_selected.at(i).s_now;
             rewards_batch.col(i) = e_selected[i].rs;
             std::array<Eigen::VectorXd, 4> s_nexts = e_selected[i].s_nexts;
             Eigen::VectorXd a(4);
             a << q->predict(s_nexts[0]).maxCoeff(),
-                    q->predict(s_nexts[1]).maxCoeff(),
-                    q->predict(s_nexts[2]).maxCoeff(),
-                    q->predict(s_nexts[3]).maxCoeff();
+                q->predict(s_nexts[1]).maxCoeff(),
+                q->predict(s_nexts[2]).maxCoeff(),
+                q->predict(s_nexts[3]).maxCoeff();
             next_qs_batch.col(i) = a;
         }
 
-        Eigen::MatrixXd /* 4d */ targets_batch =
-            rewards_batch + (/*GAMMA * */next_qs_batch);
+        Eigen::MatrixXd /* 4d */ targets_batch = rewards_batch + (/*GAMMA * */ next_qs_batch);
 
         Eigen::VectorXd next_qs_average(4);
         for (int i = 0; i < 4; i++) {
@@ -211,14 +211,12 @@ void chooseMove() {
             rewards_average[i] = rewards_batch.row(i).mean();
         }
 
-        Eigen::MatrixXd /* 4d */ loss_batch(4, SAMPLE);
-        for (int i = 0; i < SAMPLE; i++) {
+        Eigen::MatrixXd /* 4d */ loss_batch(4, SAMPLE_SIZE);
+        for (int i = 0; i < SAMPLE_SIZE; i++) {
             for (int j = 0; j < 4; j++) {
                 // 2乗誤差
-                loss_batch(j, i) =
-                        (targets_batch.col(i) - next_qs_batch.col(i))[j]
-                        * (targets_batch.col(i) - next_qs_batch.col(i))[j] /
-                        2.0;
+                loss_batch(j, i) = (targets_batch.col(i) - next_qs_batch.col(i))[j]
+                                   * (targets_batch.col(i) - next_qs_batch.col(i))[j] / 2.0;
             }
         }
         Eigen::VectorXd loss_average(4);
@@ -226,7 +224,7 @@ void chooseMove() {
             loss_average[i] = loss_batch.row(i).mean();
         }
 
-        Eigen::MatrixXd dout_batch(4, SAMPLE);
+        Eigen::MatrixXd dout_batch(4, SAMPLE_SIZE);
         dout_batch = targets_batch - next_qs_batch;
 
         /*
@@ -237,9 +235,8 @@ void chooseMove() {
         std::cout << "next_qs: " << std::endl;
         std::cout << next_qs_average << std::endl;
         */
-        q->setDoutAndBackProp(s_batch, dout_batch, /*print_weight = */false);
+        q->setDoutAndBackProp(s_batch, dout_batch, /*print_weight = */ false);
     }
-
 }
 
 

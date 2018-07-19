@@ -124,75 +124,75 @@ struct WrapFunc {
 template <typename INT, typename... HIDDEN_LAYERS>
 struct WrapFuncBatch_ {
     static Eigen::MatrixXd predict_(
-            const Eigen::MatrixXd& x,
-            std::tuple<HIDDEN_LAYERS...>& layers)
+        const Eigen::MatrixXd& x,
+        std::tuple<HIDDEN_LAYERS...>& layers)
     {
         return WrapFuncBatch_<WrapInt<INT::value_plus_1>, HIDDEN_LAYERS...>::predict_(
-                std::get<INT::value>(layers).forward(x), layers);
+            std::get<INT::value>(layers).forward(x), layers);
     }
     static Eigen::MatrixXd backProp_(
-            const Eigen::MatrixXd& dout,
-            std::tuple<HIDDEN_LAYERS...>& layers)
+        const Eigen::MatrixXd& dout,
+        std::tuple<HIDDEN_LAYERS...>& layers)
     {
         return WrapFuncBatch_<WrapInt<INT::value_plus_1>, HIDDEN_LAYERS...>::backProp_(
-                std::get<INT::value>(layers).backward(dout), layers);
+            std::get<INT::value>(layers).backward(dout), layers);
     }
     static void updateWeight_(const std::shared_ptr<WeightOptimizer>& optimizer,
-                              std::tuple<HIDDEN_LAYERS...>& layers, const bool& print)
+        std::tuple<HIDDEN_LAYERS...>& layers, const bool& print)
     {
         if constexpr (std::get<INT::value>(layers).HAS_WEIGHT) {
             std::get<INT::value>(layers).updateWeight(optimizer);
             std::get<INT::value>(layers).printWeight(print);
         }
         WrapFuncBatch_<WrapInt<INT::value_plus_1>, HIDDEN_LAYERS...>::updateWeight_(
-                optimizer, layers, print);
+            optimizer, layers, print);
     }
 };
 
 template <typename... HIDDEN_LAYERS>
 struct WrapFuncBatch_<WrapInt<0>, HIDDEN_LAYERS...> {
     static Eigen::MatrixXd predict_(
-            const Eigen::MatrixXd& x,
-            std::tuple<HIDDEN_LAYERS...>& layers)
+        const Eigen::MatrixXd& x,
+        std::tuple<HIDDEN_LAYERS...>& layers)
     {
         return WrapFuncBatch_<WrapInt<1>, HIDDEN_LAYERS...>::predict_(
-                std::get<0>(layers).forward(x), layers);
+            std::get<0>(layers).forward(x), layers);
     }
     static Eigen::MatrixXd backProp_(
-            const Eigen::MatrixXd& dout,
-            std::tuple<HIDDEN_LAYERS...>& layers)
+        const Eigen::MatrixXd& dout,
+        std::tuple<HIDDEN_LAYERS...>& layers)
     {
         return WrapFuncBatch_<WrapInt<1>, HIDDEN_LAYERS...>::backProp_(
-                std::get<sizeof...(HIDDEN_LAYERS) - 1>(layers).backward(dout), layers);
+            std::get<sizeof...(HIDDEN_LAYERS) - 1>(layers).backward(dout), layers);
     }
     static void updateWeight_(const std::shared_ptr<WeightOptimizer>& optimizer,
-                              std::tuple<HIDDEN_LAYERS...>& layers, const bool& print)
+        std::tuple<HIDDEN_LAYERS...>& layers, const bool& print)
     {
         if constexpr (std::get<0>(layers).HAS_WEIGHT) {
             std::get<0>(layers).updateWeight(optimizer);
             std::get<0>(layers).printWeight(print);
         }
         WrapFuncBatch_<WrapInt<1>, HIDDEN_LAYERS...>::updateWeight_(
-                optimizer, layers, print);
+            optimizer, layers, print);
     }
 };
 
 template <typename... HIDDEN_LAYERS>
 struct WrapFuncBatch_<WrapInt<sizeof...(HIDDEN_LAYERS) - 1>, HIDDEN_LAYERS...> {
     static Eigen::MatrixXd predict_(
-            const Eigen::MatrixXd& x,
-            std::tuple<HIDDEN_LAYERS...>& layers)
+        const Eigen::MatrixXd& x,
+        std::tuple<HIDDEN_LAYERS...>& layers)
     {
         return std::get<sizeof...(HIDDEN_LAYERS) - 1>(layers).forward(x);
     }
     static Eigen::MatrixXd backProp_(
-            const Eigen::MatrixXd& dout,
-            std::tuple<HIDDEN_LAYERS...>& layers)
+        const Eigen::MatrixXd& dout,
+        std::tuple<HIDDEN_LAYERS...>& layers)
     {
         return std::get<0>(layers).backward(dout);
     }
     static void updateWeight_(const std::shared_ptr<WeightOptimizer>& optimizer,
-                              std::tuple<HIDDEN_LAYERS...>& layers, const bool& print)
+        std::tuple<HIDDEN_LAYERS...>& layers, const bool& print)
     {
         if constexpr (std::get<sizeof...(HIDDEN_LAYERS) - 1>(layers).HAS_WEIGHT) {
             std::get<sizeof...(HIDDEN_LAYERS) - 1>(layers).updateWeight(optimizer);
@@ -204,19 +204,19 @@ struct WrapFuncBatch_<WrapInt<sizeof...(HIDDEN_LAYERS) - 1>, HIDDEN_LAYERS...> {
 template <typename... HIDDEN_LAYERS>
 struct WrapFuncBatch {
     static Eigen::MatrixXd predict(
-            const Eigen::MatrixXd& x,
-            std::tuple<HIDDEN_LAYERS...>& layers)
+        const Eigen::MatrixXd& x,
+        std::tuple<HIDDEN_LAYERS...>& layers)
     {
         return WrapFuncBatch_<WrapInt<0>, HIDDEN_LAYERS...>::predict_(x, layers);
     }
     static Eigen::MatrixXd backProp(
-            const Eigen::MatrixXd& dout,
-            std::tuple<HIDDEN_LAYERS...>& layers)
+        const Eigen::MatrixXd& dout,
+        std::tuple<HIDDEN_LAYERS...>& layers)
     {
         return WrapFuncBatch_<WrapInt<0>, HIDDEN_LAYERS...>::backProp_(dout, layers);
     }
     static void updateWeight(const std::shared_ptr<WeightOptimizer>& optimizer,
-                             std::tuple<HIDDEN_LAYERS...>& layers, const bool& print)
+        std::tuple<HIDDEN_LAYERS...>& layers, const bool& print)
     {
         WrapFuncBatch_<WrapInt<0>, HIDDEN_LAYERS...>::updateWeight_(optimizer, layers, print);
     }
@@ -290,12 +290,12 @@ private:
     Eigen::VectorXd m_loss{};
 };
 
-template <typename LAST_LAYER, std::size_t BATCH_SIZE_, typename... HIDDEN_LAYERS>
+template <typename LAST_LAYER, typename... HIDDEN_LAYERS>
 class FullConnectedNetworkBatch
 {
 public:
     explicit FullConnectedNetworkBatch(const std::shared_ptr<WeightOptimizer>& optimizer)
-            : m_optimizer(optimizer)
+        : m_optimizer(optimizer)
     {
         this->initLayers();
     }
@@ -323,7 +323,7 @@ public:
     void backProp(const Eigen::MatrixXd& x, const Eigen::MatrixXd& t)
     {
         m_loss = this->loss(x, t);
-        Eigen::MatrixXd dout = Eigen::MatrixXd::Ones(LAST_LAYER::OUTPUT_SIZE, BATCH_SIZE_);
+        Eigen::MatrixXd dout = Eigen::MatrixXd::Ones(LAST_LAYER::OUTPUT_SIZE, x.cols());
         dout = m_last_layer.backward(dout);
         dout = WrapFuncBatch<HIDDEN_LAYERS...>::backProp(dout, m_layers);
     }
