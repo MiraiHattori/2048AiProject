@@ -54,6 +54,17 @@ int main()
                 board->eagerMoveEvaluation();
             }
             board->clear();
+            if (i % 10000 == 0) {
+                std::cout << "Total iteration: " << i + 1 << std::endl;
+                std::cout << "Turn average: "
+                          << std::accumulate(turns.begin(), turns.end(), 0)
+                                 / turns.size()
+                          << std::endl;
+                std::cout << "Score average: "
+                          << std::accumulate(scores.begin(), scores.end(), 0)
+                                 / scores.size()
+                          << std::endl;
+            }
         }
         std::cout << "Total iteration: " << Params::GAME_ITERATION << std::endl;
         std::cout << "Turn average: "
