@@ -16,7 +16,8 @@ int main()
         // ai/ai.cppに実体のある関数。プログラム開始時のAI処理
         AI::init();
         // 予め決められた回数のゲームを行う
-        for (int i = 0; i < Params::GAME_ITERATION; i++) {
+        int i = 0;
+        while (true) {
             // 1ゲーム
             // ai/ai.cppに実体のある関数。ゲームごとのAI初期化処理
             AI::initGame();
@@ -64,7 +65,10 @@ int main()
                           << std::accumulate(scores.begin(), scores.end(), 0)
                                  / scores.size()
                           << std::endl;
+                turns.clear();
+                scores.clear();
             }
+            i++;
         }
         std::cout << "Total iteration: " << Params::GAME_ITERATION << std::endl;
         std::cout << "Turn average: "
