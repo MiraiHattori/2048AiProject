@@ -18,10 +18,10 @@ constexpr int BATCH_SIZE = 100;
 constexpr int SAMPLE_SIZE = 20;
 std::shared_ptr<GD> gd = nullptr;
 using QNet = FullConnectedNetworkBatch<DummyBatch<4, 4>,
-    AffineBatch<16, 100, SAMPLE_SIZE>, ReluBatch<100, 100, SAMPLE_SIZE>,
-    AffineBatch<100, 50, SAMPLE_SIZE>, ReluBatch<50, 50, SAMPLE_SIZE>,
-    AffineBatch<50, 20, SAMPLE_SIZE>, ReluBatch<20, 20, SAMPLE_SIZE>,
-    AffineBatch<20, 4, SAMPLE_SIZE>>;
+    AffineBatch<16, 100>, ReluBatch<100, 100>,
+    AffineBatch<100, 50>, ReluBatch<50, 50>,
+    AffineBatch<50, 20>, ReluBatch<20, 20>,
+    AffineBatch<20, 4>>;
 std::unique_ptr<QNet> q = nullptr;
 
 void init()
@@ -243,7 +243,6 @@ void chooseMove(const double& e_greedy_epsilon)
         */
         q->setDoutAndBackProp(s_batch, dout_batch);
     }
-    // printWeight();
 }
 
 void printWeight()

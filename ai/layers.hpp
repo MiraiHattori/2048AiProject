@@ -78,7 +78,7 @@ private:
     Eigen::VectorXd m_inverse_mask = Eigen::VectorXd::Zero(INPUT_SIZE_);
 };
 
-template <std::size_t INPUT_SIZE_, std::size_t OUTPUT_SIZE_, std::size_t BATCH_SIZE_>
+template <std::size_t INPUT_SIZE_, std::size_t OUTPUT_SIZE_>
 class ReluBatch
 {
 public:
@@ -137,7 +137,7 @@ public:
     static constexpr bool HAS_WEIGHT = false;
 
 private:
-    Eigen::MatrixXd m_inverse_mask = Eigen::MatrixXd::Zero(OUTPUT_SIZE_, BATCH_SIZE_);
+    Eigen::MatrixXd m_inverse_mask;
 };
 
 template <std::size_t INPUT_SIZE_, std::size_t OUTPUT_SIZE_>
@@ -263,7 +263,7 @@ private:
 };
 
 // Eigen前提
-template <std::size_t INPUT_SIZE_, std::size_t OUTPUT_SIZE_, std::size_t BATCH_SIZE_>
+template <std::size_t INPUT_SIZE_, std::size_t OUTPUT_SIZE_>
 class AffineBatch
 {
 public:
@@ -343,7 +343,7 @@ public:
     static constexpr bool HAS_WEIGHT = true;
 
 private:
-    Eigen::MatrixXd m_x = Eigen::MatrixXd::Zero(INPUT_SIZE_, BATCH_SIZE_);
+    Eigen::MatrixXd m_x;
     Eigen::MatrixXd m_w = Eigen::MatrixXd::Zero(OUTPUT_SIZE_, INPUT_SIZE_);
     Eigen::VectorXd m_b = Eigen::VectorXd::Zero(OUTPUT_SIZE_);
     Eigen::MatrixXd m_dw = Eigen::MatrixXd::Zero(OUTPUT_SIZE_, INPUT_SIZE_);
