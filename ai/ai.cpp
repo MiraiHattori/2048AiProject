@@ -15,7 +15,7 @@ namespace AI
 
 
 std::shared_ptr<GD> gd = nullptr;
-using QNet = FullConnectedNetworkBatch<DummyBatch<4, 4>, AffineBatch<16, 20>, ReluBatch<20, 20>, AffineBatch<20, 4>>;
+using QNet = FullConnectedNetworkBatch<DummyBatch<4, 4>, AffineBatch<16, 100>, ReluBatch<100, 100>, AffineBatch<100, 4>>;
 std::unique_ptr<QNet> q = nullptr;
 
 void init()
