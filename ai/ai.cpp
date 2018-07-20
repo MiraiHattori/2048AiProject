@@ -14,8 +14,13 @@ namespace AI
 {
 
 
+constexpr int BATCH_SIZE = 100;
+constexpr int SAMPLE_SIZE = 20;
 std::shared_ptr<GD> gd = nullptr;
-using QNet = FullConnectedNetworkBatch<DummyBatch<4, 4>, AffineBatch<16, 100>, ReluBatch<100, 100>, AffineBatch<100, 4>>;
+using QNet = FullConnectedNetworkBatch<DummyBatch<4, 4>,
+    AffineBatch<16, 3, SAMPLE_SIZE>, ReluBatch<3, 3, SAMPLE_SIZE>,
+    AffineBatch<3, 5, SAMPLE_SIZE>, ReluBatch<5, 5, SAMPLE_SIZE>,
+    AffineBatch<5, 4, SAMPLE_SIZE>>;
 std::unique_ptr<QNet> q = nullptr;
 
 void init()
@@ -166,8 +171,6 @@ void chooseMove(const double& e_greedy_epsilon)
     // 学習段
     // TODO 埋め込みされている
     // 何試行ごとに学習するか
-    constexpr int BATCH_SIZE = 10000;
-    constexpr int SAMPLE_SIZE = 1000;
 
     static int cnt = -1;
     cnt++;
@@ -239,6 +242,7 @@ void chooseMove(const double& e_greedy_epsilon)
         */
         q->setDoutAndBackProp(s_batch, dout_batch);
     }
+    // printWeight();
 }
 
 void printWeight()

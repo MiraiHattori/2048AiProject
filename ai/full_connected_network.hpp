@@ -33,7 +33,7 @@ struct WrapFunc_ {
         std::tuple<HIDDEN_LAYERS...>& layers)
     {
         return WrapFunc_<WrapInt<INT::value_plus_1>, HIDDEN_LAYERS...>::backProp_(
-            std::get<INT::value>(layers).backward(dout), layers);
+            std::get<sizeof...(HIDDEN_LAYERS) - 1 - INT::value>(layers).backward(dout), layers);
     }
     static void updateWeight_(const std::shared_ptr<WeightOptimizer>& optimizer,
         std::tuple<HIDDEN_LAYERS...>& layers)
@@ -157,7 +157,7 @@ struct WrapFuncBatch_ {
         std::tuple<HIDDEN_LAYERS...>& layers)
     {
         return WrapFuncBatch_<WrapInt<INT::value_plus_1>, HIDDEN_LAYERS...>::backProp_(
-            std::get<INT::value>(layers).backward(dout), layers);
+            std::get<sizeof...(HIDDEN_LAYERS) - 1 - INT::value>(layers).backward(dout), layers);
     }
     static void updateWeight_(const std::shared_ptr<WeightOptimizer>& optimizer,
         std::tuple<HIDDEN_LAYERS...>& layers)
@@ -363,8 +363,12 @@ public:
     Eigen::MatrixXd loss(const Eigen::MatrixXd& x, const Eigen::MatrixXd& t)
     {
         // TODO L2正則化などはここで実装するとよい
+        // std::cout << "#################################" << std::endl;
+        // std::cout << x.cols() << " " << x.rows() << std::endl;
         Eigen::MatrixXd y = this->predict(x);
+        // std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl;
         Eigen::MatrixXd loss = m_last_layer.forward(y, t);
+        // std::cout << "'''''''''''''''''''''''''''''''''''" << std::endl;
         return loss;
     }
 

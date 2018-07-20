@@ -78,7 +78,7 @@ private:
     Eigen::VectorXd m_inverse_mask = Eigen::VectorXd::Zero(INPUT_SIZE_);
 };
 
-template <std::size_t INPUT_SIZE_, std::size_t OUTPUT_SIZE_>
+template <std::size_t INPUT_SIZE_, std::size_t OUTPUT_SIZE_, std::size_t BATCH_SIZE_>
 class ReluBatch
 {
 public:
@@ -90,35 +90,34 @@ public:
 
     Eigen::MatrixXd forward(const Eigen::MatrixXd& x)
     {
+        // std::cout << "relu forward" << std::endl;
         Eigen::MatrixXd out = x;
         /*
         std::cout << "relu forward: x = " << std::endl;
         std::cout << x.transpose() << std::endl;
         */
-        // batch_size = x.cols()
-        m_inverse_mask = Eigen::MatrixXd::Zero(INPUT_SIZE_, x.cols());
+        Eigen::MatrixXd inverse_mask = Eigen::MatrixXd::Zero(INPUT_SIZE_, x.cols());
         for (int i = 0; i < x.cols(); i++) {
             for (std::size_t j = 0; j < OUTPUT_SIZE_; j++) {
-                m_inverse_mask(j, i) = (x(j, i) >= 0.0 ? 1.0 : 0.0);
-                out(j, i) *= m_inverse_mask(j, i);
+                inverse_mask(j, i) = (x(j, i) >= 0.0 ? 1.0 : 0.0);
+                out(j, i) *= inverse_mask(j, i);
             }
+        }
+        // xの長さが1なら順方向しか計算しない(m_inverse_maskのサイズがバッチ学習のときとデータセット1つ1つのテストのときとで変わってしまうため)
+        if (x.cols() != 1) {
+            m_inverse_mask = inverse_mask;
         }
         /*
         std::cout << "relu forward: mask = " << std::endl;
         std::cout << m_inverse_mask.transpose() << std::endl;
         */
+        // std::cout << "relu forward end" << std::endl;
         return out;
     }
 
     Eigen::MatrixXd backward(const Eigen::MatrixXd& dout)
     {
         Eigen::MatrixXd dx = dout;
-        /*
-        std::cout << "relu backward: dout = " << std::endl;
-        std::cout << dout.transpose() << std::endl;
-        std::cout << "relu backward: mask = " << std::endl;
-        std::cout << m_inverse_mask.transpose() << std::endl;
-        */
         for (int i = 0; i < dout.cols(); i++) {
             for (std::size_t j = 0; j < INPUT_SIZE_; j++) {
                 dx(j, i) *= m_inverse_mask(j, i);
@@ -138,7 +137,7 @@ public:
     static constexpr bool HAS_WEIGHT = false;
 
 private:
-    Eigen::MatrixXd m_inverse_mask;
+    Eigen::MatrixXd m_inverse_mask = Eigen::MatrixXd::Zero(OUTPUT_SIZE_, BATCH_SIZE_);
 };
 
 template <std::size_t INPUT_SIZE_, std::size_t OUTPUT_SIZE_>
@@ -264,7 +263,7 @@ private:
 };
 
 // Eigen前提
-template <std::size_t INPUT_SIZE_, std::size_t OUTPUT_SIZE_>
+template <std::size_t INPUT_SIZE_, std::size_t OUTPUT_SIZE_, std::size_t BATCH_SIZE_>
 class AffineBatch
 {
 public:
@@ -282,15 +281,21 @@ public:
 
     Eigen::MatrixXd forward(const Eigen::MatrixXd& x)
     {
-        m_x = x;
+        // std::cout << "affine forward" << std::endl;
+        // xが長さ1のときは順方向しか計算しない
+        if (x.cols() != 1) {
+            m_x = x;
+        }
         Eigen::MatrixXd out(OUTPUT_SIZE_, x.cols());
         for (int i = 0; i < x.cols(); i++) {
-            out.col(i) = m_w * m_x.col(i) + m_b;
+            out.col(i) = m_w * x.col(i) + m_b;
         }
+        // std::cout << "affine forward end" << std::endl;
         return out;
     }
     Eigen::MatrixXd backward(const Eigen::MatrixXd& dout)
     {
+        // std::cout << "affine backward" << std::endl;
         /*
         std::cout << "affine backward: dout = " << std::endl;
         std::cout << dout.transpose() << std::endl;
@@ -301,6 +306,7 @@ public:
         for (std::size_t i = 0; i < OUTPUT_SIZE_; i++) {
             m_db[i] = dout.row(i).mean();
         }
+        // std::cout << "affine backward end" << std::endl;
         return dx;
     }
 
@@ -318,11 +324,11 @@ public:
         std::cout << "b.transpose(): " << std::endl;
         std::cout << m_b.transpose() << std::endl;
         /*
-            std::cout << "dw: " << std::endl;
-            std::cout << m_dw << std::endl;
-            std::cout << "db.transpose(): " << std::endl;
-            std::cout << m_db.transpose() << std::endl;
-            */
+        std::cout << "dw: " << std::endl;
+        std::cout << m_dw << std::endl;
+        std::cout << "db.transpose(): " << std::endl;
+        std::cout << m_db.transpose() << std::endl;
+        */
     }
 
     const Eigen::MatrixXd& w() const { return m_w; }
@@ -337,7 +343,7 @@ public:
     static constexpr bool HAS_WEIGHT = true;
 
 private:
-    Eigen::VectorXd m_x;
+    Eigen::MatrixXd m_x = Eigen::MatrixXd::Zero(INPUT_SIZE_, BATCH_SIZE_);
     Eigen::MatrixXd m_w = Eigen::MatrixXd::Zero(OUTPUT_SIZE_, INPUT_SIZE_);
     Eigen::VectorXd m_b = Eigen::VectorXd::Zero(OUTPUT_SIZE_);
     Eigen::MatrixXd m_dw = Eigen::MatrixXd::Zero(OUTPUT_SIZE_, INPUT_SIZE_);
@@ -481,8 +487,7 @@ public:
             "Error in class DummyBatch; OUTPUT_SIZE <= 0");
     }
 
-    Eigen::MatrixXd
-    forward(const Eigen::MatrixXd& x, const Eigen::MatrixXd& /* t */)
+    Eigen::MatrixXd forward(const Eigen::MatrixXd& x, const Eigen::MatrixXd& /* t */)
     {
         return x;
     }
