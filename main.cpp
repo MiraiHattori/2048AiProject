@@ -17,13 +17,14 @@ int main()
         AI::init();
         // 予め決められた回数のゲームを行う
         int i = 0;
+        double e_greedy = 0.0;
         while (true) {
             // 1ゲーム
             // ai/ai.cppに実体のある関数。ゲームごとのAI初期化処理
             AI::initGame();
             while (true) {
                 // ai/ai.cppに実体のある関数。基本この中身だけ変更すれば良い
-                AI::chooseMove();
+                AI::chooseMove(e_greedy);
 
                 // 選択された動作に基づいて実際に盤面を上下左右動かし、ターンや点数を更新する
                 if (not board->move()) {
@@ -58,6 +59,7 @@ int main()
             if (i % 10000 == 0) {
                 std::cout << "Weights and Biases" << std::endl;
                 AI::printWeight();
+                std::cout << "Epsilon_greedy[%]: " << e_greedy << std::endl;
                 std::cout << "Total iteration: " << i + 1 << std::endl;
                 std::cout << "Turn average: "
                           << std::accumulate(turns.begin(), turns.end(), 0)
@@ -69,6 +71,10 @@ int main()
                           << std::endl;
                 turns.clear();
                 scores.clear();
+                e_greedy = Util::power(Util::randUniform(0.0, 1.0) - 1, 2U);
+                if (Util::randUniform(0.0, 100.0) < 30.0) {
+                    e_greedy = 0.0;
+                }
             }
             i++;
         }

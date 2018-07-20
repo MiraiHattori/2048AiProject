@@ -6,6 +6,6 @@ namespace AI
 
 void init();
 void initGame();
-void chooseMove();
+void chooseMove(const double& e_greedy_epsilon);
 void printWeight();
 }  // namespace AI

@@ -15,13 +15,13 @@ namespace AI
 
 
 std::shared_ptr<GD> gd = nullptr;
-using QNet = FullConnectedNetworkBatch<DummyBatch<4, 4>, AffineBatch<16, 40>, ReluBatch<40, 40>, AffineBatch<40, 4>>;
+using QNet = FullConnectedNetworkBatch<DummyBatch<4, 4>, AffineBatch<16, 20>, ReluBatch<20, 20>, AffineBatch<20, 4>>;
 std::unique_ptr<QNet> q = nullptr;
 
 void init()
 {
     // initialization
-    gd = std::make_shared<GD>(0.001);
+    gd = std::make_shared<GD>(0.01);
     q = std::make_unique<QNet>(gd);
 }
 
@@ -52,7 +52,7 @@ struct Experience {
     std::array<Eigen::VectorXd, 4> s_nexts;
 };
 
-void chooseMove()
+void chooseMove(const double& e_greedy_epsilon)
 {
     using Board::board;
     using Board::Manipulation;
@@ -119,6 +119,11 @@ void chooseMove()
     for (int i = 0; i < 4 /*acts.size()*/; i++) {
         board_array_ifs_eigen[i] = boardArrayToEigenVec(board_array_ifs[i]);
     }
+    std::array<bool, 4> can_go(
+        {board_array_ifs[0] != board->boardArray(),
+            board_array_ifs[1] != board->boardArray(),
+            board_array_ifs[2] != board->boardArray(),
+            board_array_ifs[3] != board->boardArray()});
 
     double max = -std::numeric_limits<double>::max();
     for (int i = 0; i < 4 /*acts.size()*/; i++) {
@@ -127,12 +132,14 @@ void chooseMove()
             manip = static_cast<Manipulation>(i + 1);
         }
     }
-    /*
     // epsilon-greedy でときどきランダムな行動
-    if (Util::randUniform(0.0, 100.0) < 10.0) {
-        manip = static_cast<Manipulation>(Util::randUniform(1, 5));
+    if (Util::randUniform(0.0, 100.0) < e_greedy_epsilon) {
+        Manipulation manip_cand = static_cast<Manipulation>(
+            Util::randUniform(1, 5));
+        if (can_go[static_cast<int>(manip_cand)]) {
+            manip = manip_cand;
+        }
     }
-    */
     switch (manip) {
     case Manipulation::Up:
         board->up();
@@ -151,11 +158,6 @@ void chooseMove()
     }
 
     Eigen::VectorXd /* 4d */ rewards(4);
-    std::array<bool, 4> can_go(
-        {board_array_ifs[0] != board->boardArray(),
-            board_array_ifs[1] != board->boardArray(),
-            board_array_ifs[2] != board->boardArray(),
-            board_array_ifs[3] != board->boardArray()});
     rewards << (can_go[0] ? 1.0 : 0.0),
         (can_go[1] ? 1.0 : 0.0),
         (can_go[2] ? 1.0 : 0.0),
