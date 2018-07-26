@@ -35,7 +35,7 @@ public:
     Eigen::MatrixXd updateWeight(
         const Eigen::MatrixXd& w,
         const Eigen::MatrixXd& w_grad,
-        const double& lambda) const
+        const double& lambda) const override
     {
         return w - lambda * w_grad;
     }
