@@ -189,7 +189,7 @@ void chooseMove(const double& e_greedy_epsilon)
         std::sample(data.begin(), data.end(), std::back_inserter(e_selected),
             SAMPLE_SIZE, engine);
         // 長いほうがいいので
-        /* constexpr double GAMMA = 1.00; */
+        constexpr double GAMMA = 1.00;
 
         Eigen::MatrixXd s_batch(16, SAMPLE_SIZE);
         Eigen::MatrixXd /* 4d */ rewards_batch(4, SAMPLE_SIZE);
@@ -206,7 +206,7 @@ void chooseMove(const double& e_greedy_epsilon)
             next_qs_batch.col(i) = a;
         }
 
-        Eigen::MatrixXd /* 4d */ targets_batch = rewards_batch + (/*GAMMA * */ next_qs_batch);
+        Eigen::MatrixXd /* 4d */ targets_batch = rewards_batch + (GAMMA * next_qs_batch);
 
         Eigen::VectorXd next_qs_average(4);
         for (int i = 0; i < 4; i++) {
