@@ -31,8 +31,7 @@ public:
 
     explicit Board()
     {
-        this->placeTwoOrFour();
-        this->eagerMoveEvaluation();
+        this->clear();
     }
 
     const int& turn() const { return m_turn; }
@@ -57,6 +56,7 @@ public:
         m_turn = 0;
         m_score = 0;
         m_board_array = BoardArray();
+        this->placeTwoOrFour();
         this->placeTwoOrFour();
         this->eagerMoveEvaluation();
     }
